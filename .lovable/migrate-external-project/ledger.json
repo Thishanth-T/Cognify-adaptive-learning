@@ -1,0 +1,7 @@
+[
+{"capability":"frontend code (onboarding, dashboard, twin, graph, agents, workspace, log)","source":"src/","outcome":"migrate","status":"done","next_action":"none"},
+{"capability":"assessment API (/api/assessment, rubric evaluator)","source":"server/ (Express)","outcome":"migrate to server route","status":"done","next_action":"none"},
+{"capability":"AI provider","source":"server/services/ai (no provider registered)","outcome":"preserved as pluggable; rubric fallback active","status":"accepted","next_action":"optional: connect an AI model"},
+{"capability":"database/records/auth/users","source":"none (demo data in browser storage)","outcome":"not present","status":"verified","next_action":"none"},
+{"capability":"secrets","source":"COGNIFY_AI_PROVIDER optional","outcome":"none required","status":"verified","next_action":"none"}
+]
