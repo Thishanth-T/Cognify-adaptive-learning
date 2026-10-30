@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { evaluateAnswer } from "@/server/evaluator";
+import { evaluateAnswer } from "@/lib/ai/evaluator.server";
 
 const assessmentRequestSchema = z.object({
   concept: z.string().min(1, "Concept is required").max(200),
