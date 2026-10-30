@@ -1,7 +1,7 @@
 // @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
-import { getAssessmentRubric } from './assessmentRubrics'
-import { getAIProvider, getRegisteredProviders } from './ai/provider'
+import { getAssessmentRubric } from './assessmentRubrics.server'
+import { getAIProvider, getRegisteredProviders } from './provider.server'
 
 export type AssessmentInput = {
   concept: string

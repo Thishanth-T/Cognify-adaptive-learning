@@ -1,6 +1,6 @@
 // @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
-import type { AIProviderInput } from './provider'
+import type { AIProviderInput } from './provider.server'
 
 export function buildAssessmentPrompt(
   input: AIProviderInput,
