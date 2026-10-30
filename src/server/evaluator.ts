@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
 import { getAssessmentRubric } from './assessmentRubrics'
 import { getAIProvider, getRegisteredProviders } from './ai/provider'

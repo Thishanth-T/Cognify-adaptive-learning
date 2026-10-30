@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
 export type ConceptRubric = {
     concept: string

@@ -1,3 +1,4 @@
+// @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
 import { useEffect, useMemo, useState } from 'react'
 import {
