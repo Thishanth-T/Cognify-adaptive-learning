@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assessments: {
+        Row: {
+          answer: string
+          concept: string
+          correct: boolean | null
+          created_at: string
+          evaluation_method: string
+          feedback: string
+          id: string
+          misconceptions: Json
+          missing_points: Json
+          question: string
+          recommended_next_step: string | null
+          score: number | null
+          status: string
+          strengths: Json
+          subject: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          concept: string
+          correct?: boolean | null
+          created_at?: string
+          evaluation_method: string
+          feedback: string
+          id?: string
+          misconceptions?: Json
+          missing_points?: Json
+          question: string
+          recommended_next_step?: string | null
+          score?: number | null
+          status: string
+          strengths?: Json
+          subject: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          concept?: string
+          correct?: boolean | null
+          created_at?: string
+          evaluation_method?: string
+          feedback?: string
+          id?: string
+          misconceptions?: Json
+          missing_points?: Json
+          question?: string
+          recommended_next_step?: string | null
+          score?: number | null
+          status?: string
+          strengths?: Json
+          subject?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_paths: {
+        Row: {
+          id: string
+          level: string | null
+          student: Json
+          subject: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          level?: string | null
+          student?: Json
+          subject: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          level?: string | null
+          student?: Json
+          subject?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
