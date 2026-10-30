@@ -1,12 +1,18 @@
 // @ts-nocheck -- imported from original Cognify project (looser TS settings)
 
 import { getAssessmentRubric } from './assessmentRubrics.server'
-import { getAIProvider, getRegisteredProviders } from './provider.server'
+import { generateJson, AIUnavailableError } from './gateway.server'
+import { ASSESSMENT_SYSTEM, buildAssessmentPrompt } from './assessmentPrompt.server'
+import { validateAIAssessment, assessmentJsonSchema } from './responseSchema'
 
 export type AssessmentInput = {
   concept: string
   question: string
   answer: string
+  subject?: string
+  topic?: string
+  level?: string
+  knownMisconceptionTags?: string[]
 }
 
 export type AssessmentResult = {
@@ -18,7 +24,9 @@ export type AssessmentResult = {
   missingPoints: string[]
   misconceptions: string[]
   recommendedNextStep: string
+  misconceptionTags?: string[]
   evaluationMethod: 'ai_model' | 'rubric_phrase_match' | 'manual_review'
+  aiUnavailableReason?: string
 }
 
 function normalize(text: string): string {
@@ -29,7 +37,7 @@ function normalize(text: string): string {
     .trim()
 }
 
-function evaluateWithRubric(input: AssessmentInput): AssessmentResult {
+export function evaluateWithRubric(input: AssessmentInput): AssessmentResult {
   const answer = normalize(input.answer)
 
   if (!answer) {
@@ -113,6 +121,7 @@ function evaluateWithRubric(input: AssessmentInput): AssessmentResult {
     strengths,
     missingPoints,
     misconceptions: detectedMisconceptions,
+    misconceptionTags: detectedMisconceptions.map((d) => d.toLowerCase().slice(0, 60)),
     recommendedNextStep:
       missingPoints.length > 0
         ? `Review: ${missingPoints[0]}`
@@ -124,29 +133,38 @@ function evaluateWithRubric(input: AssessmentInput): AssessmentResult {
 export async function evaluateAnswer(
   input: AssessmentInput,
 ): Promise<AssessmentResult> {
-  const answer = normalize(input.answer)
+  if (!normalize(input.answer)) return evaluateWithRubric(input)
 
-  if (!answer) {
-    return evaluateWithRubric(input)
-  }
-
-  const selectedProvider = process.env.COGNIFY_AI_PROVIDER
-  const availableProviders = getRegisteredProviders()
-
-  if (selectedProvider && availableProviders.includes(selectedProvider)) {
+  // AI grading is the primary path; set COGNIFY_AI_PROVIDER=rubric to force the fallback.
+  if (process.env['COGNIFY_AI_PROVIDER'] !== 'rubric') {
     try {
-      const provider = getAIProvider(selectedProvider)
-      const result = await provider.evaluate(input)
-
-      return {
-        ...result,
-        evaluationMethod: 'ai_model',
-      }
+      const rubric = getAssessmentRubric(input.concept)
+      const raw = await generateJson({
+        system: ASSESSMENT_SYSTEM,
+        user: buildAssessmentPrompt({
+          subject: input.subject ?? 'General',
+          topic: input.topic ?? input.concept,
+          level: input.level ?? 'Beginner',
+          concept: input.concept,
+          question: input.question,
+          answer: input.answer,
+          rubricHints: rubric?.criteria.map((c) => c.description),
+          knownMisconceptionTags: input.knownMisconceptionTags,
+        }),
+        schemaName: 'assessment',
+        schema: assessmentJsonSchema,
+      })
+      const result = validateAIAssessment(raw)
+      return { ...result, evaluationMethod: 'ai_model' }
     } catch (error) {
-      console.error('AI assessment failed:', error)
-      // Fall back to the existing rubric evaluator.
+      console.error('AI assessment failed, using rubric fallback:', error instanceof Error ? error.message : error)
+      const fallback = evaluateWithRubric(input)
+      return {
+        ...fallback,
+        aiUnavailableReason: error instanceof AIUnavailableError ? error.message : 'The AI response failed validation.',
+      }
     }
   }
 
-  return evaluateWithRubric(input)
+  return { ...evaluateWithRubric(input), aiUnavailableReason: 'AI grading is turned off for this deployment.' }
 }
