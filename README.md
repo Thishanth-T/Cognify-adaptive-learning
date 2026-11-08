@@ -1,4 +1,4 @@
-<h1 align="center">Cognify — Adaptive AI Learning Platform</h1>
+# Cognify — Adaptive AI Learning Platform
 
 <p align="center">
   <strong>An AI-powered adaptive learning platform that evaluates conceptual understanding, tracks student mastery with a Bayesian Learning Twin, and generates personalized learning paths.</strong>
@@ -7,6 +7,20 @@
 <p align="center">
   Cognify replaces passive keyword quizzes with an active explanation loop. Students explain concepts in their own words, receive criterion-level AI evaluations with partial credit, identify specific misconceptions, and progress through a dynamic prerequisite knowledge graph.
 </p>
+
+---
+
+## 🌐 Live Website
+
+**[Launch Cognify →](https://cognify-adaptive-learning.thishanth.workers.dev/)**
+
+Explore the live Cognify adaptive learning platform.
+
+## 🎬 Product Demo Video
+
+Watch the Cognify product walkthrough to see its interface, features, and learning workflow in action.
+
+**[▶ Watch Cognify — Product Demo](https://drive.google.com/file/d/1FsuBHv4SLX4QMf3vSCsg2Q314NhIXLpS/view?usp=sharing)**
 
 ---
 
@@ -24,7 +38,7 @@
 - [Screenshots](#screenshots)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
+- [Environment Variables](#environment-variables-reference)
 - [Roadmap](#roadmap)
 - [Acknowledgements](#acknowledgements)
 
@@ -43,12 +57,14 @@ The platform brings together an explanation-based assessment studio, a Bayesian 
 ## The Problem
 
 Traditional computer-based assessments suffer from common limitations:
+
 - **Keyword matching**: Correct explanations phrased in unique ways are marked wrong, while memorized buzzwords receive full credit.
 - **All-or-nothing scoring**: Partial understanding is not recognized or rewarded.
 - **Conflating omission with error**: Leaving out an advanced detail is treated as a factual contradiction.
 - **Static progression**: Students are forced through linear chapter lists regardless of individual mastery or prerequisite gaps.
 
 Students need feedback that explains:
+
 - Which specific criteria they demonstrated accurately.
 - Which concepts were omitted or incompletely explained.
 - Whether any explicit misconceptions were detected.
@@ -209,31 +225,37 @@ $$\text{confidence} = \max\left(0.10, \min\left(0.95, \text{evidence} - \frac{\s
 ## Screenshots
 
 ### Onboarding
+
 The onboarding experience introduces Cognify and guides the learner through subject, topic, and difficulty selection.
 
 ![Cognify onboarding](screenshots/01-onboarding.png)
 
 ### Dashboard
+
 The central dashboard summarizes the active curriculum track, Bayesian mastery, recent submissions, and agent status.
 
 ![Cognify dashboard](screenshots/02-dashboard.png)
 
 ### Concept Graph
+
 Interactive topological knowledge graph illustrating prerequisite dependencies, node states, and mastery badges.
 
 ![Cognify concept graph](screenshots/03-concept-graph.png)
 
 ### Learning Workspace
+
 Interactive study studio featuring challenge prompts, code insertion tools, live evaluation modal, and the Socratic AI Tutor.
 
 ![Cognify learning workspace](screenshots/04-learning-workspace.png)
 
 ### Learning Twin
+
 Visual model of cognitive competence, confidence levels, learning trends, and the misconception registry.
 
 ![Cognify Learning Twin](screenshots/05-learning-twin.png)
 
 ### Progress & History
+
 Comprehensive assessment ledger tracking scores, criteria breakdown, evaluator feedback, and longitudinal mastery over time.
 
 ![Cognify progress and history](screenshots/06-progress-history.png)
@@ -400,6 +422,7 @@ npm run test
 ## Acknowledgements
 
 Cognify is built with open-source software and tools:
+
 - [TanStack Start](https://tanstack.com/start) & [TanStack Router](https://tanstack.com/router)
 - [React 19](https://react.dev/)
 - [Google Gemini API](https://ai.google.dev/)
