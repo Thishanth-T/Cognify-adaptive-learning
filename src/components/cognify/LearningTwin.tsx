@@ -1,445 +1,400 @@
-// @ts-nocheck -- imported from original Cognify project (looser TS settings)
-
-import { useEffect, useMemo, useState } from 'react'
-import type { StudentMastery } from '@/data/sampleData'
-import {
-  loadStudent,
-  getMasteryPercentage,
-  getConceptMastery,
-  getAssessmentStats,
-} from '@/data/sampleData'
+// @ts-nocheck
+import { useMemo } from 'react'
 
 type LearningTwinProps = {
   subject?: string
   topic?: string
+  learningData: any
+  onSelectConcept?: (conceptId: string) => void
+  onNavigateToWorkspace?: () => void
 }
 
 export default function LearningTwin({
-  subject = 'General',
-  topic = 'Learning',
+  subject = 'C++',
+  topic = 'Pointers',
+  learningData,
+  onSelectConcept,
+  onNavigateToWorkspace,
 }: LearningTwinProps) {
-  const [student, setStudent] = useState<StudentMastery | null>(null)
-
-  useEffect(() => {
-    const refreshStudent = () => {
-      try {
-        setStudent(loadStudent(subject, topic))
-      } catch (error) {
-        console.error('Could not load Learning Twin data:', error)
-        setStudent(null)
-      }
-    }
-
-    refreshStudent()
-
-    // Refresh when the user returns to this browser tab.
-    window.addEventListener('focus', refreshStudent)
-
-    return () => {
-      window.removeEventListener('focus', refreshStudent)
-    }
-  }, [subject, topic])
-
-  const stats = useMemo(() => {
-    if (!student) {
-      return null
-    }
-
-    const assessment = getAssessmentStats(student)
-    const mastery = getMasteryPercentage(student)
-
-    const concepts = [
-      ...new Set(
-        student.answerHistory.map(answer => answer.concept)
-      ),
-    ]
-
-    const conceptBreakdown = concepts.map(concept => ({
-      concept,
-      percentage: getConceptMastery(student, concept),
-      attempts: student.answerHistory.filter(
-        answer => answer.concept === concept
-      ).length,
-    }))
-
-    const strongAreas = conceptBreakdown.filter(
-      item => item.percentage !== null && item.percentage >= 70
-    ).length
-
-    const areasToRevisit = conceptBreakdown.filter(
-      item => item.percentage !== null && item.percentage < 40
-    ).length
-
-    return {
-      assessment,
-      mastery,
-      conceptBreakdown,
-      strongAreas,
-      areasToRevisit,
-    }
-  }, [student])
+  const { twin, plan, history, assessments } = learningData
 
   const radius = 72
   const circumference = 2 * Math.PI * radius
 
-  const progress =
-    stats?.mastery !== null && stats?.mastery !== undefined
-      ? (stats.mastery / 100) * circumference
-      : 0
+  const hasAssessments = twin.overall !== null
 
-  const getMasteryColor = (value: number) => {
-    if (value >= 70) return '#34D399'
-    if (value >= 40) return '#A78BFA'
-    return '#FBBF24'
+  const progress = hasAssessments
+    ? (twin.overall / 100) * circumference
+    : 0
+
+  const scoredNodes = useMemo(() => {
+    return twin.nodes.filter((n: any) => n.mastery !== null)
+  }, [twin])
+
+  const avgConfidence = useMemo(() => {
+    if (scoredNodes.length === 0) return 0
+    const sum = scoredNodes.reduce((acc: number, n: any) => acc + (n.confidence || 0), 0)
+    return Math.round((sum / scoredNodes.length) * 100)
+  }, [scoredNodes])
+
+  const getMasteryColor = (value: number | null) => {
+    if (value === null) return '#64748B'
+    if (value >= 75) return '#10B981'
+    if (value >= 40) return '#0D9488'
+    return '#F43F5E'
   }
 
-  const getMasteryLabel = (value: number) => {
-    if (value >= 70) return 'Strong'
+  const getMasteryLabel = (value: number | null) => {
+    if (value === null) return 'Not yet assessed'
+    if (value >= 75) return 'Mastered'
     if (value >= 40) return 'Developing'
-    return 'Needs attention'
+    return 'Needs Attention'
   }
-
-  if (!student || !stats) {
-    return (
-      <section className="flex min-h-[420px] items-center justify-center rounded-2xl border border-violet-400/15 bg-[#0B1227] p-6">
-        <p className="text-sm text-slate-400">
-          Loading Learning Twin...
-        </p>
-      </section>
-    )
-  }
-
-  const hasAssessment = stats.mastery !== null
 
   return (
-    <section className="flex min-h-0 flex-col gap-6 rounded-2xl border border-violet-400/20 bg-gradient-to-br from-[#10152D] via-[#0D142B] to-[#080E1F] p-5 shadow-[0_0_35px_rgba(139,92,246,0.06)] sm:p-7">
-
+    <section className="flex min-h-0 flex-col gap-6">
       {/* HEADER */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-violet-400 shadow-[0_0_12px_#A78BFA]" />
-
-            <h2 className="text-xl font-semibold text-white">
-              Learning Twin
-            </h2>
+            <span className="h-2 w-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+              Cognitive Knowledge State
+            </p>
           </div>
-
-          <p className="mt-1 text-sm text-slate-400">
-            A snapshot of your learning patterns and assessed mastery
-          </p>
-
-          <p className="mt-1 text-xs text-violet-300/80">
-            {subject} / {topic}
+          <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+            Your Learning Twin
+          </h2>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Bayesian cognitive model tracking real conceptual mastery and confidence across {subject} · {topic}.
           </p>
         </div>
 
-        <span className="rounded-full border border-cyan-400/30 bg-cyan-400/[0.08] px-3 py-1.5 text-[10px] font-bold tracking-wider text-cyan-300">
-          LIVE LOCAL DATA
+        <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1 text-xs font-semibold tracking-wider text-teal-700 dark:text-teal-300 font-mono">
+          BAYESIAN ENGINE ACTIVE
         </span>
       </div>
 
-      {/* MAIN MASTERY OVERVIEW */}
-      <div className="grid gap-6 rounded-2xl border border-violet-400/15 bg-[#080F22]/70 p-5 sm:grid-cols-[minmax(220px,0.9fr)_1.1fr] sm:items-center sm:p-7">
+      {/* OVERVIEW RING & METRICS */}
+      <div className="cognify-card p-6 sm:p-8">
+        <div className="grid gap-6 sm:grid-cols-[minmax(220px,0.9fr)_1.1fr] sm:items-center">
+          {/* MASTERY RING */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative flex h-[220px] w-[220px] items-center justify-center sm:h-[240px] sm:w-[240px]">
+              <svg
+                viewBox="0 0 180 180"
+                className="-rotate-90 h-full w-full overflow-visible"
+                aria-label={`Overall mastery ${twin.overall ?? 0}%`}
+                role="img"
+              >
+                <defs>
+                  <linearGradient id="twinMasteryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#0D9488" />
+                    <stop offset="100%" stopColor="#2563EB" />
+                  </linearGradient>
+                </defs>
 
-        {/* MASTERY RING */}
-        <div className="flex flex-col items-center justify-center">
-          <div className="relative flex h-[230px] w-[230px] items-center justify-center sm:h-[270px] sm:w-[270px]">
-            <svg
-              viewBox="0 0 180 180"
-              className="-rotate-90 h-full w-full overflow-visible"
-              aria-label={
-                hasAssessment
-                  ? `Overall assessed accuracy ${stats.mastery}%`
-                  : 'Mastery has not been assessed yet'
-              }
-              role="img"
-            >
-              <defs>
-                <linearGradient
-                  id="twinMasteryGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor="#C084FC" />
-                  <stop offset="50%" stopColor="#8B5CF6" />
-                  <stop offset="100%" stopColor="#22D3EE" />
-                </linearGradient>
-
-                <filter id="twinMasteryGlow">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              <circle
-                cx="90"
-                cy="90"
-                r={radius}
-                fill="none"
-                stroke="#222B46"
-                strokeWidth="11"
-              />
-
-              {hasAssessment && (
                 <circle
                   cx="90"
                   cy="90"
                   r={radius}
                   fill="none"
-                  stroke="url(#twinMasteryGradient)"
-                  strokeWidth="11"
-                  strokeLinecap="round"
-                  strokeDasharray={`${progress} ${circumference}`}
-                  filter="url(#twinMasteryGlow)"
-                  className="transition-all duration-1000"
+                  stroke="currentColor"
+                  className="text-slate-200 dark:text-slate-800"
+                  strokeWidth="10"
                 />
+
+                {hasAssessments && (
+                  <circle
+                    cx="90"
+                    cy="90"
+                    r={radius}
+                    fill="none"
+                    stroke="url(#twinMasteryGradient)"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={`${progress} ${circumference}`}
+                    className="transition-all duration-1000"
+                  />
+                )}
+              </svg>
+
+              <div className="absolute flex flex-col items-center text-center px-2">
+                <span className={`${hasAssessments ? 'text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white font-display' : 'text-base font-bold text-slate-500 dark:text-slate-400'} tracking-tight`}>
+                  {hasAssessments ? `${twin.overall}%` : 'Not Assessed Yet'}
+                </span>
+                <span className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+                  Global Mastery
+                </span>
+                <span className="mt-2 rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-[11px] font-medium text-teal-700 dark:text-teal-300 font-mono">
+                  {hasAssessments ? `${avgConfidence}% Confidence` : 'Awaiting Attempt'}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 max-w-[260px] text-center">
+              {hasAssessments ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Calculated from {twin.totalAttempts} evaluated practice {twin.totalAttempts === 1 ? 'assessment' : 'assessments'}.
+                </p>
+              ) : (
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-2.5 text-center">
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">No Assessment Data Yet</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                    Submit an explanation in the Learning Workspace to calibrate your cognitive model.
+                  </p>
+                </div>
               )}
-            </svg>
-
-            <div className="absolute flex flex-col items-center text-center">
-              <span className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
-                {hasAssessment ? `${stats.mastery}%` : '--'}
-              </span>
-
-              <span className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">
-                Overall mastery
-              </span>
-
-              <span className="mt-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-[10px] text-violet-200">
-                {hasAssessment ? 'Assessed' : 'Not assessed'}
-              </span>
             </div>
           </div>
 
-          <p className="mt-2 max-w-[240px] text-center text-xs leading-relaxed text-slate-500">
-            {hasAssessment
-              ? 'Calculated from answers that have actually been evaluated.'
-              : 'Your mastery score will appear after your answers are evaluated.'}
-          </p>
-        </div>
+          {/* 4-METRIC GRID */}
+          <div className="flex flex-col gap-3">
+            <div className="mb-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                Cognitive State
+              </p>
+              <h3 className="mt-0.5 text-lg font-bold text-slate-900 dark:text-white font-display">Competency Breakdown</h3>
+            </div>
 
-        {/* STATISTICS */}
-        <div className="flex flex-col gap-3">
-          <div className="mb-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Learning overview
-            </p>
-
-            <h3 className="mt-1 text-lg font-semibold text-white">
-              Your learning snapshot
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-violet-400/15 bg-violet-400/[0.06] p-4">
-              <div className="text-2xl font-bold text-violet-300">
-                {stats.conceptBreakdown.length}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white font-display">{twin.nodes.length}</div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Curriculum Concepts</p>
               </div>
 
-              <p className="mt-1 text-xs text-slate-400">
-                Explored concepts
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-cyan-400/15 bg-cyan-400/[0.06] p-4">
-              <div className="text-2xl font-bold text-cyan-300">
-                {stats.assessment.totalResponses}
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5">
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-display">{twin.strong.length}</div>
+                <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-300">Mastered (≥75%)</p>
               </div>
 
-              <p className="mt-1 text-xs text-slate-400">
-                Recorded attempts
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[0.06] p-4">
-              <div className="text-2xl font-bold text-emerald-300">
-                {stats.strongAreas}
+              <div className="rounded-xl border border-teal-500/20 bg-teal-500/5 p-3.5">
+                <div className="text-2xl font-bold text-teal-600 dark:text-teal-400 font-display">
+                  {twin.nodes.filter((n: any) => n.state === 'learning').length}
+                </div>
+                <p className="mt-1 text-xs text-teal-800 dark:text-teal-300">Developing (40-74%)</p>
               </div>
 
-              <p className="mt-1 text-xs text-slate-400">
-                Strong concepts
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.06] p-4">
-              <div className="text-2xl font-bold text-amber-300">
-                {stats.areasToRevisit}
+              <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3.5">
+                <div className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-display">{twin.weak.length}</div>
+                <p className="mt-1 text-xs text-rose-800 dark:text-rose-300">Needs Attention (&lt;40%)</p>
               </div>
-
-              <p className="mt-1 text-xs text-slate-400">
-                Concepts to revisit
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs text-slate-400">
-                Assessed accuracy
-              </span>
-
-              <span className="text-lg font-bold text-violet-300">
-                {hasAssessment ? `${stats.mastery}%` : '--'}
-              </span>
             </div>
 
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-1000"
-                style={{
-                  width: `${stats.mastery ?? 0}%`,
-                }}
-              />
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                <span>Verified Assessments</span>
+                <span className="font-semibold text-slate-900 dark:text-white font-mono">{twin.totalAttempts} submissions</span>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                <span>Identified Misconceptions</span>
+                <span className="font-semibold text-rose-600 dark:text-rose-400 font-mono">{twin.misconceptions.length} recorded</span>
+              </div>
             </div>
-
-            <p className="mt-2 text-[10px] text-slate-500">
-              {stats.assessment.correctAnswers} correct ·{' '}
-              {stats.assessment.incorrectAnswers} incorrect ·{' '}
-              {stats.assessment.unassessedAnswers} awaiting evaluation
-            </p>
           </div>
         </div>
       </div>
 
-      {/* CONCEPT MASTERY BREAKDOWN */}
-      <div className="rounded-2xl border border-white/[0.07] bg-[#080F22]/50 p-5 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      {/* RECURRING MISCONCEPTIONS SECTION */}
+      <div className="cognify-card p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Performance analysis
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                Misconception Detection & Longitudinal Tracking
+              </h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Agent 2 isolates genuine factual and mechanical errors from mere omissions, tracking them over time.
             </p>
-
-            <h3 className="mt-1 text-lg font-semibold text-white">
-              Concept mastery breakdown
-            </h3>
           </div>
-
-          <span className="text-xs text-slate-500">
-            {stats.conceptBreakdown.length} concepts
+          <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300 font-mono">
+            {twin.misconceptions.length} tracked
           </span>
         </div>
 
-        {stats.conceptBreakdown.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-white/10 p-6 text-center">
-            <p className="text-sm font-medium text-slate-300">
-              No practice data yet
-            </p>
-
-            <p className="mt-2 text-xs leading-relaxed text-slate-500">
-              Submit answers in your Learning Workspace to start
-              building your Learning Twin.
-            </p>
+        {twin.misconceptions.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-xs text-slate-500 dark:text-slate-400">
+            ✦ No recurring misconceptions identified. Explanations show clean conceptual accuracy.
           </div>
         ) : (
-          <div className="space-y-5">
-            {stats.conceptBreakdown.map((item, index) => {
-              const percentage = item.percentage
-              const color =
-                percentage === null
-                  ? '#64748B'
-                  : getMasteryColor(percentage)
-
-              return (
-                <div key={`${item.concept}-${index}`}>
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold"
-                        style={{
-                          color,
-                          backgroundColor: `${color}18`,
-                          border: `1px solid ${color}35`,
-                        }}
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-
-                      <div>
-                        <p className="text-sm font-semibold text-slate-200">
-                          {item.concept}
-                        </p>
-
-                        <p className="mt-0.5 text-[10px] text-slate-500">
-                          {percentage === null
-                            ? 'Awaiting assessment'
-                            : getMasteryLabel(percentage)}
-                          {' · '}
-                          {item.attempts} attempts
-                        </p>
-                      </div>
-                    </div>
-
-                    <span
-                      className="text-lg font-bold tabular-nums"
-                      style={{ color }}
-                    >
-                      {percentage === null ? '--' : `${percentage}%`}
+          <div className="space-y-3">
+            {twin.misconceptions.map((m: any, idx: number) => (
+              <div
+                key={idx}
+                className={`rounded-xl border p-3.5 transition ${
+                  m.recurring
+                    ? 'border-rose-500/30 bg-rose-500/10 text-rose-900 dark:text-rose-100'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                      {m.recurring ? 'RECURRING' : 'OBSERVED'}
                     </span>
+                    <span className="text-xs font-semibold text-slate-900 dark:text-white">{m.tag}</span>
                   </div>
-
-                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-800">
-                    {percentage !== null && (
-                      <div
-                        className="h-full rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${percentage}%`,
-                          background: `linear-gradient(90deg, ${color}99, ${color})`,
-                          boxShadow: `0 0 12px ${color}55`,
-                        }}
-                      />
-                    )}
-                  </div>
+                  <span
+                    className={`rounded-md px-2 py-0.5 text-[10px] font-bold font-mono ${
+                      m.recurring
+                        ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {m.count} occurrence{m.count === 1 ? '' : 's'}
+                  </span>
                 </div>
-              )
-            })}
+                <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  Concept: {m.concepts.join(', ')}
+                </p>
+                {m.recurring && (
+                  <p className="mt-1.5 text-[11px] text-rose-700 dark:text-rose-300 border-t border-rose-500/20 pt-1.5">
+                    Recommendation: Request the AI Tutor in the Workspace for a step-by-step contrastive explanation.
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* INTERPRETATION */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-cyan-400/15 bg-cyan-400/[0.04] p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg text-cyan-300">◇</span>
-
-            <h3 className="text-sm font-semibold text-cyan-200">
-              What this represents
-            </h3>
+      {/* CONCEPT MASTERY BREAKDOWN */}
+      <div className="cognify-card p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              Longitudinal Matrix
+            </p>
+            <h3 className="mt-0.5 text-lg font-bold text-slate-900 dark:text-white font-display">Concept Mastery Progression</h3>
           </div>
-
-          <p className="mt-2 text-xs leading-relaxed text-slate-400">
-            Your saved practice activity and performance on answers
-            that have been evaluated. Unassessed answers are not
-            included in mastery calculations.
-          </p>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{twin.nodes.length} concepts</span>
         </div>
 
-        <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.04] p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg text-amber-300">!</span>
+        <div className="space-y-3.5">
+          {twin.nodes.map((node: any, idx: number) => {
+            const color = getMasteryColor(node.mastery)
+            const label = getMasteryLabel(node.mastery)
 
-            <h3 className="text-sm font-semibold text-amber-200">
-              Assessment status
-            </h3>
-          </div>
+            return (
+              <div
+                key={node.id}
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40 p-3.5 transition hover:border-slate-300 dark:hover:border-slate-700"
+              >
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold font-mono"
+                      style={{
+                        color,
+                        backgroundColor: `${color}15`,
+                        border: `1px solid ${color}35`,
+                      }}
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{node.label}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        {label} · {node.attempts} attempt{node.attempts === 1 ? '' : 's'} · {Math.round(node.confidence * 100)}% confidence
+                        {node.trend && (
+                          <span className="ml-2 font-semibold">
+                            {node.trend === 'up' ? '↑ Improving' : node.trend === 'down' ? '↓ Declining' : '→ Steady'}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
 
-          <p className="mt-2 text-xs leading-relaxed text-slate-400">
-            {stats.assessment.assessedAnswers > 0
-              ? 'The displayed accuracy is calculated from evaluated answers. AI-based evaluation is not connected yet.'
-              : 'No answers have been evaluated yet. Your mastery score will remain unavailable until assessment is connected.'}
-          </p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold font-mono tabular-nums" style={{ color }}>
+                      {node.mastery !== null ? `${node.mastery}%` : 'Unassessed'}
+                    </span>
+                    {onSelectConcept && onNavigateToWorkspace && (
+                      <button
+                        onClick={() => {
+                          onSelectConcept(node.id)
+                          onNavigateToWorkspace()
+                        }}
+                        className="rounded-lg border border-slate-300 dark:border-slate-700 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition"
+                      >
+                        Study →
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                  {node.mastery !== null && (
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${node.mastery}%`,
+                        backgroundColor: color,
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      <p className="border-t border-white/[0.06] pt-4 text-center text-[10px] text-slate-500">
-        COGNIFY LEARNING TWIN · ASSESSMENT-BASED ANALYTICS
-      </p>
+      {/* LEARNING PLANNER ROADMAP */}
+      <div className="cognify-card p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+              Planner Sequence
+            </p>
+            <h3 className="mt-0.5 text-lg font-bold text-slate-900 dark:text-white font-display">Adaptive Study Path</h3>
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Agent 4 evaluates graph prerequisites and current mastery to determine highest-leverage study targets.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2.5">
+          {plan.steps.slice(0, 6).map((step: any, sIdx: number) => (
+            <div
+              key={step.id}
+              className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3.5 transition ${
+                sIdx === 0
+                  ? 'border-teal-500/40 bg-teal-500/10'
+                  : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-bold font-mono ${sIdx === 0 ? 'text-teal-700 dark:text-teal-300' : 'text-slate-400'}`}>
+                  #{String(sIdx + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{step.label}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{step.reason}</p>
+                </div>
+              </div>
+
+              {onSelectConcept && onNavigateToWorkspace && (
+                <button
+                  onClick={() => {
+                    onSelectConcept(step.id)
+                    onNavigateToWorkspace()
+                  }}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    sIdx === 0
+                      ? 'btn-primary'
+                      : 'border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400'
+                  }`}
+                >
+                  {sIdx === 0 ? 'Recommended Next →' : 'Study Concept →'}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   )
 }

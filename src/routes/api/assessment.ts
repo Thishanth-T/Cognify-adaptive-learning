@@ -6,6 +6,10 @@ const assessmentRequestSchema = z.object({
   concept: z.string().min(1, "Concept is required").max(200),
   question: z.string().min(1, "Question is required").max(2000),
   answer: z.string().min(1, "Answer is required").max(5000),
+  subject: z.string().max(100).optional(),
+  topic: z.string().max(150).optional(),
+  level: z.string().max(50).optional(),
+  knownMisconceptionTags: z.array(z.string()).optional(),
 });
 
 export const Route = createFileRoute("/api/assessment")({

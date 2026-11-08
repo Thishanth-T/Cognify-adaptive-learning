@@ -1,450 +1,381 @@
-// @ts-nocheck -- imported from original Cognify project (looser TS settings)
-
+// @ts-nocheck
 import { useState } from 'react'
-import { demoAgents } from '@/data/sampleData'
 
 type AgentPanelProps = {
   pushLog: (message: string) => void
+  learningData: any
+  onNavigateToWorkspace?: () => void
 }
 
-const agentAccents = [
+const agentConfig = [
   {
-    color: '#9B7CFF',
-    glow: 'rgba(155,124,255,0.16)',
-    border: 'rgba(155,124,255,0.3)',
-    role: 'Learning analysis',
-    icon: '◈',
+    id: 'assessment',
+    code: 'A1',
+    name: 'Assessment Agent',
+    role: 'Semantic Evaluation & Scoring',
+    color: '#0D9488',
+    description: 'Evaluates student explanations against semantic AI criteria and curriculum rubrics. Distinguishes demonstrated, partial, missing, and incorrect criteria.',
   },
   {
-    color: '#35D9FF',
-    glow: 'rgba(53,217,255,0.16)',
-    border: 'rgba(53,217,255,0.3)',
-    role: 'Knowledge mapping',
-    icon: '⌘',
+    id: 'misconception',
+    code: 'A2',
+    name: 'Misconception Detector',
+    role: 'Cognitive Gap Tracking',
+    color: '#F43F5E',
+    description: 'Analyzes student explanations to isolate genuine conceptual misconceptions and track recurring misunderstandings over time.',
   },
   {
-    color: '#FF6BC6',
-    glow: 'rgba(255,107,198,0.16)',
-    border: 'rgba(255,107,198,0.3)',
-    role: 'Practice generation',
-    icon: '✳',
+    id: 'twin',
+    code: 'A3',
+    name: 'Learning Twin Agent',
+    role: 'Cognitive State Engine',
+    color: '#2563EB',
+    description: 'Updates exponential Bayesian mastery, estimates statistical confidence, and maintains verified assessment history.',
   },
   {
-    color: '#48E0B0',
-    glow: 'rgba(72,224,176,0.16)',
-    border: 'rgba(72,224,176,0.3)',
-    role: 'Progress analysis',
-    icon: '↗',
+    id: 'planner',
+    code: 'A4',
+    name: 'Learning Planner',
+    role: 'Prerequisite Optimization',
+    color: '#059669',
+    description: 'Traverses the prerequisite DAG to calculate the optimal next study activity based on current mastery and prerequisites.',
   },
   {
-    color: '#FFC66D',
-    glow: 'rgba(255,198,109,0.16)',
-    border: 'rgba(255,198,109,0.3)',
-    role: 'Learning support',
-    icon: '✧',
+    id: 'tutor',
+    code: 'A5',
+    name: 'AI Tutor',
+    role: 'Pedagogical Explanation',
+    color: '#D97706',
+    description: 'Provides contextual Socratic explanations, code examples, and follow-up guidance tailored to the student\'s verified understanding.',
   },
 ]
 
-export default function AgentPanel({ pushLog }: AgentPanelProps) {
+export default function AgentPanel({ pushLog, learningData, onNavigateToWorkspace }: AgentPanelProps) {
+  const { agentLogs, twin, plan, askTutor, concepts } = learningData
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null)
-  const [inspectedAgents, setInspectedAgents] = useState<string[]>([])
-  const [showArchitecture, setShowArchitecture] = useState(true)
+  const [testQuestion, setTestQuestion] = useState('')
+  const [testingTutor, setTestingTutor] = useState(false)
+  const [testResult, setTestResult] = useState<string | null>(null)
 
-  const handleInspect = (agent: (typeof demoAgents)[number]) => {
-    const isExpanded = expandedAgent === agent.id
+  const handleTestTutor = async () => {
+    if (!testQuestion.trim() || testingTutor) return
+    setTestingTutor(true)
+    setTestResult(null)
+    const targetConcept = concepts[0]?.label || 'Pointers'
 
-    setExpandedAgent(isExpanded ? null : agent.id)
-
-    if (!isExpanded) {
-      setInspectedAgents((previous) =>
-        previous.includes(agent.id) ? previous : [...previous, agent.id]
-      )
-
-      pushLog(`Inspected ${agent.name}: ${agent.task}`)
+    try {
+      pushLog(`Running live test on AI Tutor for: "${testQuestion}"`)
+      const res = await askTutor(targetConcept, testQuestion)
+      setTestResult(res.answer)
+      pushLog('AI Tutor responded successfully.')
+    } catch (e: any) {
+      setTestResult('Tutor test could not complete. Check network or server connection.')
+    } finally {
+      setTestingTutor(false)
     }
   }
 
-  const activeAgent = demoAgents.find(
-    (agent) => agent.id === expandedAgent
-  )
+  // Calculate live stats for each agent
+  const agentStats = agentConfig.map((agent) => {
+    const logs = agentLogs.filter((l: any) => l.agent === agent.id)
+    const count = logs.length
+    const lastLog = logs[0] || null
+
+    const avgLatency =
+      count > 0
+        ? Math.round(logs.reduce((acc: number, l: any) => acc + (l.ms || 0), 0) / count)
+        : null
+
+    const isActive = count > 0
+
+    return {
+      ...agent,
+      count,
+      lastLog,
+      avgLatency,
+      isActive,
+    }
+  })
+
+  const totalExecutions = agentLogs.length
+  const activeAgentsCount = agentStats.filter((a) => a.isActive).length
 
   return (
-    <section className="relative space-y-5">
-
-      {/* PAGE HEADER */}
-      <div className="panel relative overflow-hidden p-5 sm:p-6">
-        <div
-          className="pointer-events-none absolute -right-10 -top-16 h-52 w-52 rounded-full"
-          style={{
-            background: 'rgba(53,217,255,0.09)',
-            filter: 'blur(55px)',
-          }}
-        />
-
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
+    <section className="relative space-y-6">
+      {/* COMMAND CENTER HEADER */}
+      <div className="cognify-card p-6 sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_12px_#35D9FF]" />
-              <p className="section-label">COGNIFY INTELLIGENCE SYSTEM</p>
+            <div className="mb-2 flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]" />
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-600 dark:text-teal-400">
+                Multi-Agent Orchestration Layer
+              </p>
             </div>
-
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              AI Agent Command Center
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
+              Autonomous Agent Command Center
             </h2>
-
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
-              Explore the specialized agents designed to support your
-              personalized learning journey.
+            <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Live status, execution latencies, and cooperative pipeline traces for Cognify's 5 specialized agents.
             </p>
           </div>
 
-          <div className="rounded-xl border border-amber-400/25 bg-amber-400/[0.07] px-4 py-3">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
-              <span className="text-xs font-semibold text-amber-300">
-                PROTOTYPE MODE
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-300">
+                PIPELINE ONLINE
               </span>
             </div>
-            <p className="mt-1 text-[10px] text-slate-400">
-              Live AI not connected
+            <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+              Gemini 3.8 Flash + Supabase
             </p>
           </div>
         </div>
 
-        {/* SYSTEM METRICS */}
-        <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            {
-              label: 'Designed agents',
-              value: demoAgents.length,
-              color: '#9B7CFF',
-            },
-            {
-              label: 'Inspected agents',
-              value: inspectedAgents.length,
-              color: '#35D9FF',
-            },
-            {
-              label: 'Available workflows',
-              value: 1,
-              color: '#48E0B0',
-            },
-            {
-              label: 'Live executions',
-              value: 0,
-              color: '#FFC66D',
-            },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3"
-            >
-              <p
-                className="text-2xl font-bold tabular-nums"
-                style={{ color: stat.color }}
-              >
-                {stat.value}
-              </p>
-              <p className="mt-1 text-[11px] text-slate-400">
-                {stat.label}
-              </p>
-            </div>
-          ))}
+        {/* SYSTEM TELEMETRY METRICS */}
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">5</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Configured Agents</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+            <p className="text-2xl font-bold text-teal-600 dark:text-teal-400 font-display">{activeAgentsCount}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Active Agents</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 font-display">{totalExecutions}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Session Executions</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5">
+            <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-display">{twin.misconceptions.length}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Tracked Misconceptions</p>
+          </div>
         </div>
       </div>
 
-      {/* ARCHITECTURE / WORKFLOW */}
-      <div className="panel p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* AGENT DIRECTORY CARDS */}
+      <div className="cognify-card p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="section-label">SYSTEM ARCHITECTURE</p>
-            <h3 className="mt-1 text-lg font-semibold text-white">
-              Multi-agent workflow
-            </h3>
-            <p className="mt-1 text-xs text-secondary">
-              How the specialized learning roles are organized
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              Agent Roles
             </p>
+            <h3 className="mt-0.5 text-lg font-bold text-slate-900 dark:text-white font-display">Autonomous Agent Directory</h3>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setShowArchitecture(!showArchitecture)}
-            className="rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-300 transition hover:bg-white/[0.05]"
-          >
-            {showArchitecture ? 'Collapse ↑' : 'Expand ↓'}
-          </button>
-        </div>
-
-        {showArchitecture && (
-          <div className="mt-5">
-            <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.045] p-4 text-center">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-cyan-300">
-                INPUT
-              </span>
-              <h4 className="mt-1 text-sm font-semibold text-white">
-                Learner activity and responses
-              </h4>
-              <p className="mt-1 text-[11px] text-slate-400">
-                Learning activity · Selected concepts · Practice responses
-              </p>
-            </div>
-
-            <div className="flex justify-center py-2">
-              <div className="h-6 w-px bg-gradient-to-b from-cyan-400 to-violet-400" />
-            </div>
-
-            <div className="rounded-xl border border-violet-400/25 bg-violet-400/[0.05] p-4 text-center">
-              <span className="text-[10px] font-bold tracking-[0.2em] text-violet-300">
-                COGNIFY ORCHESTRATION
-              </span>
-              <h4 className="mt-1 text-sm font-semibold text-white">
-                Agent coordination layer
-              </h4>
-              <p className="mt-1 text-[11px] text-slate-400">
-                Organizes the learning workflow across specialized roles
-              </p>
-            </div>
-
-            <div className="flex justify-center py-2">
-              <div className="h-6 w-px bg-gradient-to-b from-violet-400 to-emerald-400" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {demoAgents.map((agent, index) => {
-                const accent = agentAccents[index % agentAccents.length]
-
-                return (
-                  <div
-                    key={agent.id}
-                    className="rounded-xl border p-3 text-center"
-                    style={{
-                      borderColor: accent.border,
-                      background: accent.glow,
-                    }}
-                  >
-                    <span
-                      className="text-xl"
-                      style={{ color: accent.color }}
-                    >
-                      {accent.icon}
-                    </span>
-                    <p className="mt-2 text-xs font-semibold text-white">
-                      {agent.name}
-                    </p>
-                    <p className="mt-1 text-[10px] text-slate-400">
-                      Agent {index + 1}
-                    </p>
-                  </div>
-                )
-              })}
-            </div>
-
-            <p className="mt-3 text-center text-[10px] text-slate-500">
-              Conceptual architecture · Workflow execution is not yet connected
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* AGENT DIRECTORY */}
-      <div className="panel p-5 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="section-label">SPECIALIZED INTELLIGENCE</p>
-            <h3 className="mt-1 text-xl font-semibold text-white">
-              Agent directory
-            </h3>
-            <p className="mt-1 text-xs text-secondary">
-              Inspect each agent's assigned role and predefined findings.
-            </p>
-          </div>
-
-          <span className="rounded-lg border border-violet-400/20 bg-violet-400/[0.07] px-3 py-1.5 text-xs text-violet-300">
-            {demoAgents.length} configured
+          <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300 font-mono">
+            5 Cooperative Roles
           </span>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-2">
-          {demoAgents.map((agent, index) => {
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {agentStats.map((agent) => {
             const isExpanded = expandedAgent === agent.id
-            const accent = agentAccents[index % agentAccents.length]
-            const isInspected = inspectedAgents.includes(agent.id)
 
             return (
               <div
                 key={agent.id}
-                className="group relative overflow-hidden rounded-2xl border transition-all duration-300"
-                style={{
-                  borderColor: isExpanded
-                    ? accent.border
-                    : 'rgba(255,255,255,0.09)',
-                  background: isExpanded
-                    ? `linear-gradient(145deg, ${accent.glow}, rgba(10,15,32,0.95))`
-                    : 'rgba(255,255,255,0.02)',
-                  boxShadow: isExpanded
-                    ? `0 0 25px ${accent.glow}`
-                    : 'none',
-                }}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 transition hover:border-slate-300 dark:hover:border-slate-700 p-5"
               >
-                <div
-                  className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full opacity-50"
-                  style={{
-                    background: accent.glow,
-                    filter: 'blur(35px)',
-                  }}
-                />
-
-                <div className="relative p-4 sm:p-5">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-xl font-bold"
-                      style={{
-                        color: accent.color,
-                        borderColor: accent.border,
-                        background: accent.glow,
-                        boxShadow: `0 0 18px ${accent.glow}`,
-                      }}
-                    >
-                      {accent.icon}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span
-                          className="text-[10px] font-bold tracking-widest"
-                          style={{ color: accent.color }}
-                        >
-                          AGENT 0{index + 1}
-                        </span>
-
-                        <span className="rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-2 py-1 text-[9px] text-amber-300">
-                          SIMULATED
-                        </span>
-                      </div>
-
-                      <h4 className="mt-1 text-base font-semibold text-white">
-                        {agent.name}
-                      </h4>
-
-                      <p className="mt-1 text-[11px] font-medium" style={{ color: accent.color }}>
-                        {accent.role}
-                      </p>
-                    </div>
+                <div className="flex items-start gap-3">
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold"
+                    style={{
+                      color: agent.color,
+                      backgroundColor: `${agent.color}18`,
+                      border: `1px solid ${agent.color}40`,
+                    }}
+                  >
+                    {agent.code}
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-white/[0.06] bg-black/10 p-3">
-                    <p className="mb-1 text-[10px] font-semibold tracking-wider text-slate-500">
-                      ASSIGNED RESPONSIBILITY
-                    </p>
-                    <p className="text-xs leading-relaxed text-slate-300">
-                      {agent.task}
-                    </p>
-                  </div>
-
-                  {isExpanded && (
-                    <div
-                      className="mt-3 animate-fade-in rounded-xl border p-4"
-                      style={{
-                        borderColor: accent.border,
-                        background: 'rgba(0,0,0,0.18)',
-                      }}
-                    >
-                      <div className="mb-3 flex items-center gap-2">
-                        <span style={{ color: accent.color }}>◈</span>
-                        <p
-                          className="text-[10px] font-bold tracking-widest"
-                          style={{ color: accent.color }}
-                        >
-                          AGENT FINDINGS
-                        </p>
-                      </div>
-
-                      <p className="text-xs leading-relaxed text-slate-300">
-                        {agent.findings}
-                      </p>
-
-                      <div className="mt-4 border-t border-white/[0.07] pt-3">
-                        <p className="text-[10px] leading-relaxed text-slate-500">
-                          These findings are predefined demonstration content,
-                          not generated by a live AI agent.
-                        </p>
-                      </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-mono text-[11px] font-bold tracking-wider text-slate-400">
+                        {agent.code}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold font-mono ${
+                          agent.isActive
+                            ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                            : 'border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                        }`}
+                      >
+                        {agent.isActive ? 'ACTIVE' : 'READY'}
+                      </span>
                     </div>
-                  )}
 
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-[10px] text-slate-500">
-                      {isInspected ? 'Previously inspected' : 'Not inspected yet'}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => handleInspect(agent)}
-                      className="rounded-lg border px-4 py-2 text-xs font-semibold transition-all duration-200 hover:brightness-125"
-                      style={{
-                        color: accent.color,
-                        borderColor: accent.border,
-                        background: accent.glow,
-                      }}
-                    >
-                      {isExpanded ? 'Close details ↑' : 'Inspect agent →'}
-                    </button>
+                    <h4 className="mt-1 text-sm font-bold text-slate-900 dark:text-white truncate font-display">
+                      {agent.name}
+                    </h4>
+                    <p className="text-xs font-semibold" style={{ color: agent.color }}>
+                      {agent.role}
+                    </p>
                   </div>
                 </div>
+
+                <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-3">
+                  {agent.description}
+                </p>
+
+                {/* Telemetry info */}
+                <div className="mt-3 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-2.5 text-xs text-slate-500 dark:text-slate-400">
+                  <span>Executions: <strong className="text-slate-900 dark:text-white font-mono">{agent.count}</strong></span>
+                  {agent.avgLatency !== null && (
+                    <span>Latency: <strong className="text-teal-600 dark:text-teal-400 font-mono">{agent.avgLatency}ms</strong></span>
+                  )}
+                </div>
+
+                {agent.lastLog && (
+                  <div className="mt-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 text-[11px] text-slate-600 dark:text-slate-300 font-mono">
+                    <span className="font-semibold text-slate-400">Output: </span>
+                    {agent.lastLog.summary}
+                  </div>
+                )}
+
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={() => setExpandedAgent(isExpanded ? null : agent.id)}
+                    className="text-xs font-semibold hover:underline"
+                    style={{ color: agent.color }}
+                  >
+                    {isExpanded ? 'Collapse ↑' : 'Inspect Role Details →'}
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="mt-3 border-t border-slate-200 dark:border-slate-800 pt-3 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+                    <p><strong className="text-slate-900 dark:text-white">Role:</strong> {agent.description}</p>
+                    <p>
+                      <strong className="text-slate-900 dark:text-white">Status:</strong>{' '}
+                      {agent.isActive
+                        ? `Active (${agent.count} execution${agent.count === 1 ? '' : 's'} recorded)`
+                        : 'Standby — evaluates on relevant user triggers.'}
+                    </p>
+                  </div>
+                )}
               </div>
             )
           })}
         </div>
       </div>
 
-      {/* SELECTED AGENT SUMMARY */}
-      <div className="panel p-5">
-        <p className="section-label">INSPECTION CONSOLE</p>
-
-        {activeAgent ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-semibold text-white">
-                {activeAgent.name}
-              </h3>
-              <p className="mt-1 text-xs text-secondary">
-                {activeAgent.task}
-              </p>
+      {/* LIVE INTERACTIVE AGENT TEST PANEL */}
+      <div className="cognify-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-teal-500" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">Live Agent Diagnostic Test</h3>
             </div>
-
-            <span className="rounded-full border border-violet-400/20 bg-violet-400/[0.07] px-3 py-1.5 text-[10px] text-violet-300">
-              Details open
-            </span>
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Submit a prompt to test Agent 5 (AI Tutor) with live Gemini execution and trace logging.
+            </p>
           </div>
-        ) : (
-          <div className="mt-3 rounded-xl border border-dashed border-white/10 p-5 text-center">
-            <div className="text-2xl text-slate-500">⌘</div>
-            <p className="mt-2 text-sm font-medium text-slate-300">
-              No agent selected
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              Select Inspect agent on a card to view its findings here.
-            </p>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <input
+            type="text"
+            value={testQuestion}
+            onChange={(e) => setTestQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleTestTutor()
+            }}
+            placeholder="e.g. Why does dereferencing nullptr cause an undefined behavior crash?"
+            className="min-w-[280px] flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+          />
+          <button
+            onClick={handleTestTutor}
+            disabled={!testQuestion.trim() || testingTutor}
+            className="btn-primary"
+          >
+            {testingTutor ? (
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span>Running Agent...</span>
+              </span>
+            ) : (
+              <span>Execute Diagnostic Query →</span>
+            )}
+          </button>
+        </div>
+
+        {testResult && (
+          <div className="mt-4 rounded-xl border border-teal-500/30 bg-teal-500/5 p-4 text-xs text-slate-800 dark:text-slate-200">
+            <p className="font-semibold text-teal-700 dark:text-teal-400 mb-1.5 font-display">Agent Execution Output:</p>
+            <p className="whitespace-pre-line leading-relaxed">{testResult}</p>
           </div>
         )}
       </div>
 
-      {/* TRANSPARENCY NOTE */}
-      <div className="rounded-xl border border-amber-400/15 bg-amber-400/[0.035] p-4">
-        <div className="flex items-start gap-3">
-          <span className="text-lg text-amber-300">ⓘ</span>
+      {/* LIVE MULTI-AGENT EXECUTION TRACE LOG */}
+      <div className="cognify-card p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h4 className="text-xs font-semibold text-amber-200">
-              About this prototype
-            </h4>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-              This page demonstrates Cognify's proposed multi-agent
-              architecture. Agent roles and findings are sample content.
-              No live model calls, autonomous execution, or real-time
-              agent coordination are currently taking place.
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+              Pipeline Stream
             </p>
+            <h3 className="mt-0.5 text-lg font-bold text-slate-900 dark:text-white font-display">Live Execution Traces</h3>
           </div>
+          <span className="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:text-slate-300 font-mono">
+            {agentLogs.length} traces logged
+          </span>
         </div>
+
+        {agentLogs.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>No agent executions logged in this session yet.</p>
+            <p className="mt-1 text-slate-500">
+              Submit an explanation in the Learning Workspace or run a diagnostic test to see real-time multi-agent execution traces.
+            </p>
+            {onNavigateToWorkspace && (
+              <button
+                onClick={onNavigateToWorkspace}
+                className="mt-4 btn-secondary text-xs"
+              >
+                Open Learning Workspace →
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+            {agentLogs.map((log: any) => {
+              const agentItem = agentConfig.find((a) => a.id === log.agent)
+              const color = agentItem?.color || '#0D9488'
+
+              return (
+                <div
+                  key={log.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-3 text-xs transition hover:border-slate-300 dark:hover:border-slate-700"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded font-mono text-[10px] font-bold"
+                      style={{ color, background: `${color}18`, border: `1px solid ${color}35` }}
+                    >
+                      {agentItem?.code || '••'}
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white whitespace-nowrap">
+                      {agentItem?.name || log.agent}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 truncate">
+                      {log.summary}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 shrink-0">
+                    <span className="text-teal-600 dark:text-teal-400 font-bold">{log.ms}ms</span>
+                    <span>{new Date(log.timestamp).toLocaleTimeString()}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )

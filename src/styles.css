@@ -5,25 +5,22 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Cognify Design System — Modern Scholarly EdTech
+ * Clean architectural surfaces, precision typography (Space Grotesk + Plus Jakarta Sans),
+ * and purposeful semantic colors (Intellectual Teal, Cobalt, Warm Amber, Rose).
  */
 
 @theme inline {
-  --color-cognify-900: #0b1020;
-  --color-cognify-800: #0f1724;
-  --color-cognify-700: #111827;
-  --color-cognify-600: #1f2937;
-  --color-cognify-accent: #7c3aed;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-cognify-950: #070a0f;
+  --color-cognify-900: #0b0f17;
+  --color-cognify-800: #111726;
+  --color-cognify-700: #151d2e;
+  --color-cognify-600: #1e293b;
+  --color-cognify-accent: #0d9488;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -67,74 +64,121 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.004 247);
+  --foreground: oklch(0.145 0.025 255);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.145 0.025 255);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --popover-foreground: oklch(0.145 0.025 255);
+  --primary: oklch(0.45 0.12 180);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.008 245);
+  --secondary-foreground: oklch(0.2 0.02 255);
+  --muted: oklch(0.95 0.008 245);
+  --muted-foreground: oklch(0.5 0.02 255);
+  --accent: oklch(0.94 0.015 180);
+  --accent-foreground: oklch(0.25 0.08 180);
+  --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.92 0.008 250);
+  --input: oklch(0.92 0.008 250);
+  --ring: oklch(0.55 0.1 180);
+  --chart-1: oklch(0.55 0.14 180);
+  --chart-2: oklch(0.55 0.14 250);
+  --chart-3: oklch(0.7 0.16 75);
+  --chart-4: oklch(0.6 0.18 25);
+  --chart-5: oklch(0.6 0.12 145);
+  --sidebar: oklch(0.985 0.004 247);
+  --sidebar-foreground: oklch(0.145 0.025 255);
+  --sidebar-primary: oklch(0.45 0.12 180);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.94 0.015 180);
+  --sidebar-accent-foreground: oklch(0.25 0.08 180);
+  --sidebar-border: oklch(0.92 0.008 250);
+  --sidebar-ring: oklch(0.55 0.1 180);
+
+  /* Cognify High-Craft Palette Variables */
+  color-scheme: dark;
+  --cognify-bg: #0b0f17;
+  --cognify-surface: #111726;
+  --cognify-panel: #151d2e;
+  --cognify-panel-hover: #192338;
+
+  --accent-teal: #14b8a6;
+  --accent-teal-soft: rgba(20, 184, 166, 0.10);
+  --accent-blue: #3b82f6;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --accent-emerald: #10b981;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --muted: #64748b;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --radius-panel: 12px;
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --background: oklch(0.12 0.02 260);
+  --foreground: oklch(0.985 0.005 240);
+  --card: oklch(0.16 0.025 260);
+  --card-foreground: oklch(0.985 0.005 240);
+  --popover: oklch(0.16 0.025 260);
+  --popover-foreground: oklch(0.985 0.005 240);
+  --primary: oklch(0.65 0.14 180);
+  --primary-foreground: oklch(0.1 0.02 260);
+  --secondary: oklch(0.22 0.025 260);
+  --secondary-foreground: oklch(0.985 0.005 240);
+  --muted: oklch(0.22 0.025 260);
+  --muted-foreground: oklch(0.68 0.02 250);
+  --accent: oklch(0.22 0.035 180);
+  --accent-foreground: oklch(0.95 0.05 180);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.14 180);
+  --chart-1: oklch(0.65 0.14 180);
+  --chart-2: oklch(0.65 0.14 250);
+  --chart-3: oklch(0.75 0.16 75);
+  --chart-4: oklch(0.65 0.18 25);
+  --chart-5: oklch(0.7 0.15 145);
+  --sidebar: oklch(0.14 0.02 260);
+  --sidebar-foreground: oklch(0.985 0.005 240);
+  --sidebar-primary: oklch(0.65 0.14 180);
+  --sidebar-primary-foreground: oklch(0.1 0.02 260);
+  --sidebar-accent: oklch(0.22 0.035 180);
+  --sidebar-accent-foreground: oklch(0.95 0.05 180);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.65 0.14 180);
+}
+
+html.light,
+:root[data-theme="light"],
+[data-theme="light"] {
+  color-scheme: light;
+  --cognify-bg: #f8fafc;
+  --cognify-surface: #ffffff;
+  --cognify-panel: #ffffff;
+  --cognify-panel-hover: #f1f5f9;
+
+  --accent-teal: #0d9488;
+  --accent-teal-soft: rgba(13, 148, 136, 0.08);
+  --accent-blue: #2563eb;
+  --accent-amber: #d97706;
+  --accent-rose: #e11d48;
+  --accent-emerald: #059669;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --muted: #64748b;
+
+  --border: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.16);
 }
 
 @layer base {
@@ -145,14 +189,18 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
   }
 }
 
 /* ===== Cognify original styles ===== */
-
-
-
-
 
 /* ========================================
    COGNIFY — NEURAL COMMAND CENTER
@@ -191,6 +239,305 @@
 }
 
 /* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+
+html.light,
+:root[data-theme="light"],
+[data-theme="light"] {
+  color-scheme: light;
+
+  --cognify-bg: #f8fafc;
+  --cognify-surface: #ffffff;
+  --cognify-panel: #ffffff;
+  --cognify-panel-hover: #f1f5f9;
+
+  --warm-accent: #7c3aed;
+  --warm-accent-soft: rgba(124, 58, 237, 0.12);
+
+  --neon-violet: #7c3aed;
+  --neon-cyan: #0284c7;
+  --neon-blue: #2563eb;
+  --neon-pink: #db2777;
+  --neon-green: #059669;
+  --neon-gold: #d97706;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --muted: #64748b;
+
+  --border: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.22);
+
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #e11d48;
+}
+
+html.light body {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-cognify {
+  background: #f8fafc !important;
+}
+
+html.light .bg-panel {
+  background: #ffffff !important;
+}
+
+html.light .panel {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .panel-elevated {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.14) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .input-field {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+html.light .input-field:focus {
+  background: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+html.light .progress-track {
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* ========================================
+   LIGHT THEME — comprehensive panel overrides
+   Fix hardcoded dark bg-[#...] values that
+   Tailwind utility overrides cannot catch alone.
+======================================== */
+
+/* Panel backgrounds — dark hex values become white/near-white */
+html.light [class*="bg-[#0C152B]"],
+html.light [class*="bg-[#0D1730]"],
+html.light [class*="bg-[#070D1C]"],
+html.light [class*="bg-[#050916]"],
+html.light [class*="bg-[#0A1126]"],
+html.light [class*="bg-[#080E21]"],
+html.light [class*="bg-[#060D1E]"],
+html.light [class*="bg-[#070E20]"],
+html.light [class*="bg-[#081226]"],
+html.light [class*="bg-[#09152C]"],
+html.light [class*="bg-[#080F22]"],
+html.light [class*="bg-[#0C1529]"],
+html.light [class*="bg-[#0E1528]"],
+html.light [class*="bg-[#101E3B]"],
+html.light [class*="bg-[#0D142B]"],
+html.light [class*="bg-[#0A1224]"],
+html.light [class*="bg-[#080E1F]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Darker section panels → clean soft light tint */
+html.light [class*="bg-[#160E18]"] {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+html.light [class*="bg-[#26171F]"] {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+html.light [class*="bg-[#211D16]"] {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+html.light [class*="bg-[#0F2D25]"] {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+html.light [class*="bg-[#10263B]"] {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+html.light [class*="bg-[#292318]"] {
+  background-color: #fefce8 !important;
+  border-color: #fef08a !important;
+}
+html.light [class*="bg-[#0C2023]"] {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+/* Concept Graph canvas keeps dark for readability of SVG */
+html.light [class*="bg-[#070D1D]"] {
+  background-color: #0f172a !important;
+}
+
+/* Gradient panels that use dark from-[] via-[] backgrounds */
+html.light [class*="from-[#111936]"],
+html.light [class*="from-[#11142E]"],
+html.light [class*="from-[#10152A]"],
+html.light [class*="from-[#10152D]"],
+html.light [class*="from-[#0D142B]"],
+html.light [class*="from-[#080E1F]"],
+html.light [class*="from-[#191638]"],
+html.light [class*="from-[#15152F]"],
+html.light [class*="from-[#10182D]"],
+html.light [class*="from-[#0A162B]"],
+html.light [class*="from-[#101E3B]"],
+html.light [class*="from-[#101938]"],
+html.light [class*="from-[#0E152F]"],
+html.light [class*="from-[#0A0F22]"] {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ----------------------------------------
+   Light theme: text contrast overrides
+---------------------------------------- */
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-100 {
+  color: #0f172a !important;
+}
+
+/* Headings and generic text-white become dark slate */
+html.light h1.text-white,
+html.light h2.text-white,
+html.light h3.text-white,
+html.light h4.text-white,
+html.light h5.text-white,
+html.light p.text-white,
+html.light span.text-white {
+  color: #0f172a !important;
+}
+
+/* Enhance neon/pastel text readability in light theme */
+html.light .text-cyan-300 {
+  color: #0284c7 !important;
+}
+html.light .text-violet-300,
+html.light .text-violet-200 {
+  color: #6d28d9 !important;
+}
+html.light .text-emerald-300,
+html.light .text-emerald-200 {
+  color: #047857 !important;
+}
+html.light .text-amber-300,
+html.light .text-amber-200 {
+  color: #b45309 !important;
+}
+html.light .text-rose-300,
+html.light .text-rose-200 {
+  color: #be123c !important;
+}
+
+/* Filled dark buttons / badges MUST keep white text */
+html.light .btn-primary,
+html.light .btn-primary *,
+html.light button[class*="bg-violet-600"],
+html.light button[class*="bg-violet-600"] *,
+html.light button[class*="from-violet-600"],
+html.light button[class*="from-violet-600"] *,
+html.light button[class*="bg-indigo-600"],
+html.light button[class*="bg-indigo-600"] *,
+html.light [class*="bg-gradient-to-r from-violet"] *,
+html.light [class*="bg-gradient-to-br from-violet"] *,
+html.light .badge-white-text {
+  color: #ffffff !important;
+}
+
+/* Sidebar nav inactive labels */
+html.light nav .text-slate-300,
+html.light nav .text-slate-400 {
+  color: #1e293b !important;
+}
+
+/* Input fields with dark hardcoded backgrounds */
+html.light input[class*="bg-[#"],
+html.light textarea[class*="bg-[#"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+/* Input placeholders */
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Headings that use text-white */
+html.light h2.text-white,
+html.light h3.text-white,
+html.light h4.text-white,
+html.light p.text-white {
+  color: #0f172a !important;
+}
+
+/* Dark border overrides */
+html.light [class*="border-white/"] {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+/* bg-white/ transparency overrides — near-transparent white → light card */
+html.light [class*="bg-white/[0.02]"],
+html.light [class*="bg-white/[0.03]"],
+html.light [class*="bg-white/[0.04]"],
+html.light [class*="bg-white/[0.025]"],
+html.light [class*="bg-white/[0.035]"],
+html.light [class*="bg-black/20"] {
+  background-color: #f8fafc !important;
+}
+
+/* bg-white/5 and similar Tailwind fractions */
+html.light .bg-white\/5 { background-color: #f1f5f9 !important; }
+html.light .bg-white\/\[0\.02\] { background-color: #f8fafc !important; }
+html.light .bg-white\/\[0\.03\] { background-color: #f1f5f9 !important; }
+
+/* Notifications / profile dropdowns always stay dark (floating) */
+html.light .z-50 > [class*="bg-[#0C152B]"],
+html.light .z-50 > [class*="bg-[#0D1730]"] {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+
+/* Light theme scrollbar */
+html.light * {
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+html.light *::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+}
+html.light *::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8 !important;
+}
+
+/* ========================================
    GLOBAL
 ======================================== */
 
@@ -207,31 +554,11 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  background:
-    radial-gradient(
-      ellipse at 48% -15%,
-      rgba(75, 89, 190, 0.15),
-      transparent 48%
-    ),
-    radial-gradient(
-      ellipse at 100% 55%,
-      rgba(28, 112, 175, 0.07),
-      transparent 40%
-    ),
-    var(--cognify-bg);
-
+  background-color: var(--cognify-bg);
   color: var(--text-primary);
-
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -250,8 +577,8 @@ button {
 }
 
 ::selection {
-  background: rgba(155, 124, 255, 0.35);
-  color: white;
+  background: rgba(20, 184, 166, 0.25);
+  color: inherit;
 }
 
 /* ========================================
@@ -265,11 +592,13 @@ h4,
 h5,
 h6 {
   color: var(--text-primary);
-  letter-spacing: -0.035em;
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  font-weight: 700;
 }
 
 p {
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .text-muted {
@@ -281,52 +610,25 @@ p {
 }
 
 /* ========================================
-   BACKGROUNDS
+   BACKGROUNDS & ARCHITECTURAL PANELS
 ======================================== */
 
 .bg-cognify {
-  background:
-    radial-gradient(
-      ellipse at 12% 0%,
-      rgba(100, 75, 220, 0.13),
-      transparent 38%
-    ),
-    radial-gradient(
-      ellipse at 90% 70%,
-      rgba(25, 174, 220, 0.06),
-      transparent 40%
-    ),
-    #050916;
+  background-color: var(--cognify-bg);
 }
 
 .bg-panel {
-  background: linear-gradient(
-    145deg,
-    rgba(17, 28, 53, 0.96),
-    rgba(9, 17, 35, 0.98)
-  );
+  background-color: var(--cognify-panel);
 }
 
 .bg-panel-hover {
-  background: var(--cognify-panel-hover);
+  background-color: var(--cognify-panel-hover);
 }
 
-/* ========================================
-   GLASS PANELS
-======================================== */
-
 .panel {
-  background: linear-gradient(
-    145deg,
-    rgba(17, 28, 52, 0.92),
-    rgba(9, 17, 34, 0.96)
-  );
-
+  background-color: var(--cognify-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-panel);
-
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
 }
 
 .panel-border {
@@ -335,79 +637,60 @@ p {
 
 .panel-elevated {
   position: relative;
-
-  background: linear-gradient(
-    145deg,
-    rgba(20, 33, 63, 0.96),
-    rgba(10, 18, 38, 0.98)
-  );
-
-  border: 1px solid rgba(139, 160, 255, 0.15);
+  background-color: var(--cognify-panel);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-panel);
-
-  box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
 }
 
 .panel-hover {
-  transition:
-    background 220ms ease,
-    border-color 220ms ease,
-    transform 220ms ease,
-    box-shadow 220ms ease;
+  transition: all 180ms ease;
 }
 
 .panel-hover:hover {
-  background: var(--cognify-panel-hover);
-  border-color: rgba(155, 124, 255, 0.32);
+  background-color: var(--cognify-panel-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
 
-  transform: translateY(-2px);
+/* Architectural Card & Hub Surfaces */
+.cognify-card {
+  background-color: var(--cognify-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  transition: all 180ms ease;
+}
 
-  box-shadow:
-    0 12px 35px rgba(0, 0, 0, 0.24),
-    0 0 22px rgba(139, 92, 246, 0.08);
+.cognify-card:hover {
+  border-color: var(--border-strong);
 }
 
 /* ========================================
-   NEON ACCENTS
+   ACCENT PILLS & BADGES
 ======================================== */
 
-.glow-violet {
-  box-shadow: 0 0 22px rgba(155, 124, 255, 0.25);
+.badge-teal {
+  background-color: var(--accent-teal-soft);
+  color: var(--accent-teal);
+  border: 1px solid rgba(20, 184, 166, 0.25);
 }
 
-.glow-cyan {
-  box-shadow: 0 0 22px rgba(53, 217, 255, 0.22);
+.badge-blue {
+  background-color: rgba(59, 130, 246, 0.10);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.25);
 }
 
-.glow-pink {
-  box-shadow: 0 0 22px rgba(255, 107, 198, 0.22);
+.badge-amber {
+  background-color: rgba(245, 158, 11, 0.10);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
-.glow-green {
-  box-shadow: 0 0 22px rgba(72, 224, 176, 0.20);
-}
-
-.text-neon-violet {
-  color: var(--neon-violet);
-  text-shadow: 0 0 18px rgba(155, 124, 255, 0.28);
-}
-
-.text-neon-cyan {
-  color: var(--neon-cyan);
-  text-shadow: 0 0 18px rgba(53, 217, 255, 0.25);
-}
-
-.neon-divider {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(155, 124, 255, 0.45),
-    rgba(53, 217, 255, 0.35),
-    transparent
-  );
+.badge-rose {
+  background-color: rgba(244, 63, 94, 0.10);
+  color: var(--accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
 /* ========================================
@@ -419,40 +702,41 @@ p {
   align-items: center;
   justify-content: center;
   gap: 8px;
-
-  padding: 10px 16px;
-
-  border: 1px solid rgba(155, 124, 255, 0.42);
-  border-radius: 10px;
-
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.24),
-    rgba(72, 112, 255, 0.16)
-  );
-
-  color: #d8cbff;
+  padding: 9px 18px;
+  border-radius: 8px;
+  background-color: #0d9488;
+  color: #ffffff !important;
   font-weight: 600;
-
-  box-shadow: 0 0 18px rgba(139, 92, 246, 0.08);
-
-  transition: all 200ms ease;
+  font-size: 0.875rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
+  transition: all 160ms ease;
+  border: 1px solid #0f766e;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.36),
-    rgba(72, 112, 255, 0.25)
-  );
-
-  border-color: rgba(155, 124, 255, 0.7);
-
-  box-shadow:
-    0 0 24px rgba(139, 92, 246, 0.2),
-    inset 0 0 12px rgba(255, 255, 255, 0.04);
-
+  background-color: #0f766e;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(13, 148, 136, 0.25);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background-color: var(--cognify-panel);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 160ms ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--cognify-panel-hover);
+  border-color: var(--text-secondary);
 }
 
 .btn-muted {
@@ -460,22 +744,19 @@ p {
   align-items: center;
   justify-content: center;
   gap: 8px;
-
-  padding: 9px 14px;
-
+  padding: 8px 14px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: 8px;
+  background-color: transparent;
   color: var(--text-secondary);
-
-  transition: all 180ms ease;
+  font-size: 0.8125rem;
+  transition: all 160ms ease;
 }
 
 .btn-muted:hover {
-  background: rgba(139, 92, 246, 0.09);
-  border-color: rgba(155, 124, 255, 0.3);
-  color: white;
+  background-color: var(--cognify-panel-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
 /* ========================================

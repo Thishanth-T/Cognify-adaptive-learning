@@ -78,20 +78,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cognify" },
-      { name: "description", content: "Cognify adaptive learning" },
-      { name: "author", content: "Lovable" },
+      { title: "Cognify — Your Adaptive Learning Partner" },
+      { name: "description", content: "Cognify — Adaptive AI Learning Platform with multi-agent assessment, Bayesian mastery tracking, and personalized learning recommendations." },
+      { name: "author", content: "Cognify" },
       { property: "og:title", content: "Cognify" },
-      { property: "og:description", content: "Cognify adaptive learning" },
+      { property: "og:description", content: "Adaptive AI Learning Platform — multi-agent assessment, Bayesian mastery tracking, and personalized learning recommendations." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      },
+      {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg?v=3", type: "image/svg+xml", sizes: "any" },
+      { rel: "icon", href: "/favicon.png?v=3", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon.ico?v=3", type: "image/x-icon" },
+      { rel: "shortcut icon", href: "/favicon.ico?v=3" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=3" },
     ],
   }),
   shellComponent: RootShell,
@@ -102,8 +119,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" data-theme="dark">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('cognify-theme')||'dark';document.documentElement.classList.toggle('dark',t==='dark');document.documentElement.classList.toggle('light',t==='light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>

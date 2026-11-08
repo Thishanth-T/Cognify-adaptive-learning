@@ -81,7 +81,12 @@ export const assessSignedIn = createServerFn({ method: "POST" })
 
 export const getLesson = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ ...pathFields, concept: z.string().min(1).max(200), prerequisites: z.array(z.string().max(200)).max(10), weakPoints: z.array(z.string().max(400)).max(5).optional() }).parse(d),
+    z.object({
+      ...pathFields,
+      concept: z.string().min(1).max(200),
+      prerequisites: z.array(z.string().max(200)).max(10),
+      weakPoints: z.array(z.string().max(400)).max(5).optional(),
+    }).parse(d),
   )
   .handler(async ({ data }) => {
     const { generateLesson, rateLimit, aiErrorMessage } = await import("./pipeline.server");
@@ -95,7 +100,19 @@ export const getLesson = createServerFn({ method: "POST" })
 
 export const askTutor = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ ...pathFields, concept: z.string().min(1).max(200), question: z.string().trim().min(1).max(1000), context: z.string().max(1500).optional() }).parse(d),
+    z.object({
+      ...pathFields,
+      concept: z.string().min(1).max(200),
+      question: z.string().trim().min(1).max(1000),
+      context: z.string().max(1500).optional(),
+      // Structured assessment evidence from the pipeline — avoids re-evaluating the answer.
+      // The tutor uses this to tailor explanations to what the student actually demonstrated vs. missed.
+      assessmentEvidence: z.object({
+        demonstratedCriteria: z.array(z.string().max(400)).max(10),
+        missingCriteria: z.array(z.string().max(400)).max(10),
+        incorrectStatements: z.array(z.string().max(400)).max(10),
+      }).optional(),
+    }).parse(d),
   )
   .handler(async ({ data }) => {
     const { tutorAnswer, rateLimit, aiErrorMessage } = await import("./pipeline.server");
