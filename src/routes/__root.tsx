@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportError } from "../lib/error-reporting";
+import { resolveSupabaseUrl, resolveSupabaseKey } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -118,12 +119,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Inject safe non-sensitive public Supabase config to client
+  // Never expose server secrets or service role keys
+  const publicEnv = {
+    VITE_SUPABASE_URL: resolveSupabaseUrl() || null,
+    VITE_SUPABASE_PUBLISHABLE_KEY: resolveSupabaseKey() || null,
+  };
+
   return (
     <html lang="en" className="dark" data-theme="dark">
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('cognify-theme')||'dark';document.documentElement.classList.toggle('dark',t==='dark');document.documentElement.classList.toggle('light',t==='light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+            __html: `window.__ENV__ = ${JSON.stringify(publicEnv)};(function(){try{var t=localStorage.getItem('cognify-theme')||'dark';document.documentElement.classList.toggle('dark',t==='dark');document.documentElement.classList.toggle('light',t==='light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
           }}
         />
         <HeadContent />

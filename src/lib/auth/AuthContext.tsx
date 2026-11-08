@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '@/integrations/supabase/client'
+import { supabase, isSupabaseConfigured, checkSupabaseConfigured } from '@/integrations/supabase/client'
 import type { User, Session } from '@supabase/supabase-js'
 
 export type UserProfile = {
@@ -44,8 +44,9 @@ type AuthContextType = {
   user: User | null
   profile: UserProfile | null
   session: Session | null
-  isGuest: boolean
   loading: boolean
+  isGuest: boolean
+  isCloudConfigured: boolean
   authModalOpen: boolean
   authModalMode: 'signin' | 'signup'
   authNotification: string | null
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load user profile from Supabase
   const loadProfile = async (userId: string) => {
+    if (!checkSupabaseConfigured()) return
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -97,6 +99,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    // If Supabase credentials are not configured, smoothly boot in Guest Mode
+    if (!checkSupabaseConfigured()) {
+      console.info('[Cognify] Supabase is not configured. Running in Guest Mode with local storage persistence.');
+      setIsGuest(true)
+      setLoading(false)
+      return
+    }
+
     // Check for OAuth errors in the redirect URL
     if (typeof window !== 'undefined') {
       const hash = window.location.hash
@@ -119,6 +129,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loadProfile(session.user.id)
       }
       setLoading(false)
+    }).catch(() => {
+      setIsGuest(true)
+      setLoading(false)
     })
 
     // Listen for auth changes
@@ -135,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => {
-      subscription.unsubscribe()
+      subscription?.unsubscribe?.()
     }
   }, [])
 
@@ -163,6 +176,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithEmail = async (email: string, password: string) => {
+    if (!checkSupabaseConfigured()) {
+      return { error: new Error('Supabase authentication is not configured for this deployment. Cognify is running in Guest Mode with local storage persistence.') }
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -183,6 +200,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUpWithEmail = async (email: string, password: string, displayName?: string) => {
+    if (!checkSupabaseConfigured()) {
+      return { error: new Error('Supabase authentication is not configured for this deployment. Cognify is running in Guest Mode with local storage persistence.') }
+    }
+
     try {
       const cleanName = displayName?.trim() || email.split('@')[0]
       const { data, error } = await supabase.auth.signUp({
@@ -225,6 +246,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
+    if (!checkSupabaseConfigured()) {
+      return { error: new Error('Supabase authentication is not configured for this deployment. Cognify is running in Guest Mode with local storage persistence.') }
+    }
+
     try {
       const redirectUrl =
         typeof window !== 'undefined'
@@ -278,6 +303,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile,
         session,
         isGuest,
+        isCloudConfigured: checkSupabaseConfigured(),
         loading,
         authModalOpen,
         authModalMode,

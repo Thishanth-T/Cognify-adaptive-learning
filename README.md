@@ -331,12 +331,15 @@ Create a `.env` file in the project root:
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-3.8-flash
 
-# Supabase (Optional: required for cloud authentication & persistence)
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_anon_key_here
+# Supabase (Optional: required for cloud authentication & cross-device persistence)
+# Supports full URL or Project ID; supports both PUBLISHABLE_KEY and ANON_KEY
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+# VITE_SUPABASE_PROJECT_ID=your-project-ref
+VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key_here
+# VITE_SUPABASE_ANON_KEY=your_anon_key_here
 
 # OpenAI API Key (Optional: secondary fallback provider)
-OPENAI_API_KEY=your_openai_api_key_here
+# OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 > **Note:** If `GEMINI_API_KEY` is not provided, Cognify operates in **deterministic rubric fallback mode**, evaluating answers against topic-specific rubrics. Without Supabase keys, Cognify runs in **guest mode** with full offline localStorage persistence.
@@ -365,14 +368,22 @@ npm run test
 
 ## Environment Variables Reference
 
-| Variable | Required | Description |
-|---|---|---|
-| `GEMINI_API_KEY` | Recommended | Google Gemini API key used by the Assessment and Tutor agents. |
-| `GEMINI_MODEL` | Optional | Gemini model name (defaults to `gemini-3.8-flash`). |
-| `VITE_SUPABASE_URL` | Optional | Supabase project URL for cloud authentication and record persistence. |
-| `VITE_SUPABASE_ANON_KEY` | Optional | Supabase anonymous public key. |
-| `OPENAI_API_KEY` | Optional | Secondary AI provider key if Gemini is unavailable. |
-| `DATABASE_URL` | Optional | PostgreSQL connection string for Drizzle database migrations. |
+| Variable | Environment | Required | Description |
+|---|---|---|---|
+| `GEMINI_API_KEY` | Server | Recommended | Google Gemini API key used by the live Assessment and Tutor agents. |
+| `GEMINI_MODEL` | Server | Optional | Gemini model name (defaults to `gemini-3.8-flash`). |
+| `OPENAI_API_KEY` | Server | Optional | Secondary AI provider key if Gemini is unavailable (`gpt-4o-mini`). |
+| `VITE_SUPABASE_URL` | Client (Build) | Optional | Full Supabase project URL (`https://<project-ref>.supabase.co`). |
+| `VITE_SUPABASE_PROJECT_ID` | Client (Build) | Optional | Supabase project ID (automatically derives `https://<id>.supabase.co` if full URL is omitted). |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Client (Build) | Optional | Supabase public / `anon` key for browser authentication & RLS queries. |
+| `VITE_SUPABASE_ANON_KEY` | Client (Build) | Optional | Alias for `VITE_SUPABASE_PUBLISHABLE_KEY`. |
+| `SUPABASE_URL` | Server (SSR) | Optional | Supabase project URL for server functions and SSR. |
+| `SUPABASE_PROJECT_ID` | Server (SSR) | Optional | Supabase project ID for server functions (derives URL if full URL is omitted). |
+| `SUPABASE_PUBLISHABLE_KEY` | Server (SSR) | Optional | Supabase public / `anon` key for server auth middleware token validation. |
+| `SUPABASE_ANON_KEY` | Server (SSR) | Optional | Alias for `SUPABASE_PUBLISHABLE_KEY` on server. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server (SSR) | Optional | Service-role secret key (admin operations only; **never** exposed to client). |
+| `DATABASE_URL` | Server (CI/Local) | Optional | PostgreSQL connection string for Drizzle ORM schema migrations. |
+| `CRON_SECRET` | Server (SSR) | Optional | Bearer secret for authenticated scheduled task triggers. |
 
 ---
 

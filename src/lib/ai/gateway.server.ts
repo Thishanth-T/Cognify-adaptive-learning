@@ -1,5 +1,6 @@
 // Independent AI Gateway with direct provider support (Google Gemini & OpenAI)
 import dns from "node:dns";
+import { getRuntimeEnv } from "@/lib/env";
 try {
   dns.setDefaultResultOrder?.("ipv4first");
 } catch {
@@ -15,8 +16,11 @@ export class AIUnavailableError extends Error {
   }
 }
 
-/** Helper to retrieve an environment variable from process.env or fallback to .env file */
+/** Helper to retrieve an environment variable from runtime context, process.env, or fallback to .env file */
 function getEnv(name: string): string | undefined {
+  const runtimeVal = getRuntimeEnv(name) || getRuntimeEnv(`VITE_${name}`);
+  if (runtimeVal) return runtimeVal;
+
   if (process.env[name]) return process.env[name];
   if (process.env[`VITE_${name}`]) return process.env[`VITE_${name}`];
   try {

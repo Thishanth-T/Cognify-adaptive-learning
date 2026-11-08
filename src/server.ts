@@ -46,6 +46,23 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    // In Nitro v3 (cloudflare-module), request bindings are accessed via request.runtime.cloudflare.env
+    // Ensure request has runtime.cloudflare populated without mutating shared global process.env
+    const cfEnv =
+      (env && typeof env === "object" ? env : undefined) ||
+      (request as any).runtime?.cloudflare?.env ||
+      (globalThis as any).__env__;
+
+    if (cfEnv && typeof cfEnv === "object") {
+      (globalThis as any).__env__ = cfEnv;
+      (request as any).runtime ??= { name: "cloudflare" };
+      (request as any).runtime.cloudflare = {
+        ...(request as any).runtime.cloudflare,
+        env: cfEnv,
+        context: ctx,
+      };
+    }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
