@@ -343,6 +343,7 @@ cd Cognify-adaptive-learning
 ```bash
 npm install
 ```
+> **Windows PowerShell users:** If `npm` commands are blocked by your PowerShell execution policy, use `npm.cmd` instead. For example, use `npm.cmd install`, `npm.cmd run dev`, `npm.cmd run build`, and `npm.cmd run test`.
 
 ### 3. Configure environment variables
 
