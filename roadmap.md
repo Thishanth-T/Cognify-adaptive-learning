@@ -1,5 +1,5 @@
 # Cognify roadmap
-- [x] AI assessment (Lovable AI / Pluggable Gateway) with Zod validation + rubric fallback
+- [x] AI assessment (Pluggable AI Gateway: Gemini, OpenAI, rubric fallback) with Zod validation
 - [x] Agents: assessment, misconception detector, planner, tutor, twin (pipeline server)
 - [x] Learning Twin from real history (Bayesian & exponential moving average mastery, confidence, trend)
 - [x] Adaptive graph states (mastered, learning, weak, available, locked) + prerequisite verification + next recommendation

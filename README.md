@@ -1,11 +1,11 @@
-<h1 align="center">Cognify — Your Adaptive Learning Platform</h1>
+<h1 align="center">Cognify — Adaptive AI Learning Platform</h1>
 
 <p align="center">
-  <strong>An AI-powered adaptive learning platform that focuses on how students understand concepts.</strong>
+  <strong>An AI-powered adaptive learning platform that evaluates conceptual understanding, tracks student mastery with a Bayesian Learning Twin, and generates personalized learning paths.</strong>
 </p>
 
 <p align="center">
-  Cognify turns explanation-based assessments into a personalized learning experience. Students explain concepts in their own words, receive structured feedback, identify knowledge gaps, and follow a learning path shaped by concept prerequisites and assessment evidence.
+  Cognify replaces passive keyword quizzes with an active explanation loop. Students explain concepts in their own words, receive criterion-level AI evaluations with partial credit, identify specific misconceptions, and progress through a dynamic prerequisite knowledge graph.
 </p>
 
 ---
@@ -14,12 +14,12 @@
 
 - [Overview](#overview)
 - [The Problem](#the-problem)
-- [Our Approach](#our-approach)
+- [Our Solution](#our-solution)
 - [Key Features](#key-features)
 - [How Cognify Works](#how-cognify-works)
 - [System Architecture](#system-architecture)
 - [The Five Agents](#the-five-agents)
-- [Learning Twin and Mastery Model](#learning-twin-and-mastery-model)
+- [Learning Twin & Mastery Model](#learning-twin--mastery-model)
 - [Technology Stack](#technology-stack)
 - [Screenshots](#screenshots)
 - [Project Structure](#project-structure)
@@ -32,34 +32,40 @@
 
 ## Overview
 
-Most learning platforms focus on whether an answer is right or wrong. Cognify focuses on a deeper question: **does the student understand the concept, and what should they learn next?**
+Most learning tools test recall by checking for exact keyword matches or multiple-choice selections. Cognify evaluates conceptual understanding: **does the student grasp the principles and runtime mechanics of a concept, and what should they study next?**
 
-Students explain concepts in their own words. Cognify evaluates their explanations against topic-specific criteria, surfaces potential misconceptions, tracks learning evidence, and recommends the next available concept.
+Students explain concepts in their own words. Cognify semantically evaluates their explanations against topic-specific rubrics, distinguishes factual errors from omissions, maintains an exponential moving average mastery model, and guides the student through an adaptive curriculum DAG.
 
-The platform brings together an explanation-based assessment workflow, a Learning Twin, a prerequisite-aware curriculum graph, and an on-demand Socratic AI Tutor.
+The platform brings together an explanation-based assessment studio, a Bayesian Learning Twin, a topological concept graph, and an on-demand Socratic AI Tutor.
+
+---
 
 ## The Problem
 
-Traditional quizzes and keyword-based assessments can overlook partial understanding, reward memorized phrases, and provide limited guidance about what a student should revise.
+Traditional computer-based assessments suffer from common limitations:
+- **Keyword matching**: Correct explanations phrased in unique ways are marked wrong, while memorized buzzwords receive full credit.
+- **All-or-nothing scoring**: Partial understanding is not recognized or rewarded.
+- **Conflating omission with error**: Leaving out an advanced detail is treated as a factual contradiction.
+- **Static progression**: Students are forced through linear chapter lists regardless of individual mastery or prerequisite gaps.
 
 Students need feedback that explains:
-- Which parts of their understanding are correct.
-- Which concepts may be incomplete or misunderstood.
-- How their progress changes over multiple attempts.
-- Which prerequisite or follow-up concept they should work on next.
+- Which specific criteria they demonstrated accurately.
+- Which concepts were omitted or incompletely explained.
+- Whether any explicit misconceptions were detected.
+- Which prerequisite or next topic they should focus on next.
 
-## Our Approach
+---
 
-Cognify uses an adaptive learning loop:
+## Our Solution
 
-1. **Explain** — The student describes a concept in their own words.
-2. **Evaluate** — The assessment workflow evaluates the response against topic-specific criteria.
-3. **Diagnose** — The misconception analysis identifies potential conceptual gaps.
-4. **Update** — The Learning Twin updates its learning state using available assessment evidence.
-5. **Adapt** — The planner recommends an eligible next concept using the curriculum prerequisites.
-6. **Explore** — The student can request further help from the Socratic AI Tutor.
+Cognify implements an adaptive, evidence-driven learning loop:
 
-The aim is to make assessment useful for the next learning decision, rather than presenting a score in isolation.
+1. **Explain** — The student articulates a concept in their own words within the interactive study workspace.
+2. **Evaluate** — The Assessment Agent evaluates conceptual understanding against topic-specific rubric criteria, awarding independent partial credit.
+3. **Diagnose** — The Misconception Detector separates factual errors from incomplete information and tracks recurring misconceptions.
+4. **Update** — The Learning Twin updates Bayesian exponential moving average mastery and confidence based on verified assessment scores.
+5. **Adapt** — The Adaptive Planner analyzes the curriculum DAG and recommends the next eligible concept.
+6. **Reinforce** — The Socratic AI Tutor is available on-demand to clarify feedback and explain mechanisms without redundant evaluation calls.
 
 ---
 
@@ -67,186 +73,168 @@ The aim is to make assessment useful for the next learning decision, rather than
 
 | Feature | Description |
 |---|---|
-| Explanation-based assessment | Evaluates student explanations against topic-specific criteria. |
-| Misconception analysis | Highlights potential factual errors and gaps in understanding. |
-| Learning Twin | Presents a learner's mastery state and assessment evidence. |
-| Adaptive learning path | Uses concept prerequisites and learning progress to guide progression. |
-| Curriculum Concept Graph | Visualizes concepts and their prerequisite relationships. |
-| Socratic AI Tutor | Offers additional learning assistance when requested. |
-| Assessment history | Displays saved submissions and feedback. |
-| Guest and account experiences | Supports the configured guest and Supabase authentication flows. |
-| Rubric fallback | Provides a fallback evaluation path when the AI provider is unavailable, where configured. |
-
-Feature availability depends on the current application configuration and connected services.
+| **Semantic AI Assessment** | Evaluates student explanations conceptually via Gemini 3.8 Flash; checks rubric criteria independently and awards partial credit. |
+| **Misconception Detection** | Distinguishes actual misconceptions from omitted points; identifies recurring misconception patterns over time. |
+| **Bayesian Learning Twin** | Computes exponential moving average mastery (α = 0.55), confidence metrics, and trend indicators per concept. |
+| **Adaptive Learning Planner** | Evaluates the curriculum DAG and recommends the next best learning action based on mastery and prerequisites. |
+| **Curriculum Concept Graph** | Interactive topological dependency graph; nodes unlock dynamically when prerequisites reach ≥60% mastery. |
+| **Socratic AI Tutor** | Context-aware tutoring agent that uses assessment evidence to clarify doubts and explain mechanics. |
+| **Prerequisite Gate Enforcement** | Locked topics are strictly non-assessable across Dashboard, Concept Graph, and Workspace until prerequisites are satisfied. |
+| **Multi-Agent Telemetry** | Dedicated AI Agents panel showing real-time execution times, status, and telemetry streams. |
+| **Curriculum Generation** | Generates topic-specific rubrics, questions, and DAG structures for any custom subject and topic. |
+| **Dual Storage (Cloud & Guest)** | Full guest mode with localStorage persistence, seamlessly upgradable to Supabase cloud authentication. |
+| **Deterministic Rubric Fallback** | Safe phrase-matching rubric evaluator ensures uninterrupted assessment if the AI provider is unavailable. |
 
 ---
 
 ## How Cognify Works
 
-Cognify organizes the learning workflow around five cooperating agents. The tutor is available on demand.
+Cognify coordinates five specialized learning agents in a forward-flowing cooperative pipeline:
 
 ```mermaid
 flowchart TD
-    A["Student explains a concept"] --> B["1. Assessment Agent"]
+    A["Student submits explanation"] --> B["1. Assessment Agent\n(Gemini 3.8 Flash)"]
     B --> C["2. Misconception Detector"]
     C --> D["3. Learning Twin"]
     D --> E["4. Adaptive Planner"]
-    E --> F["Personalized feedback and next concept"]
-    F --> G["5. Socratic AI Tutor"]
-    G -. "On demand" .-> H["Further learning assistance"]
+    E --> F["Scorecard & Next Concept Recommendation"]
+    F --> G["5. Socratic AI Tutor\n(On Demand)"]
+    G -. "Contextual Guidance" .-> H["Reinforced Conceptual Mastery"]
 ```
 
-### Agent responsibilities
+### The Five Agents
 
-1. **Assessment Agent** — Evaluates the student's explanation against topic-specific assessment criteria and produces structured feedback.
-2. **Misconception Detector** — Analyzes the response and assessment evidence for incorrect or incomplete understanding.
-3. **Learning Twin** — Updates the learner's mastery estimates using available evidence.
-4. **Adaptive Planner** — Recommends a next concept while considering prerequisite relationships.
-5. **Socratic AI Tutor** — Provides additional explanations and guided assistance when the student requests it.
+| Agent | Source File | Responsibility |
+|---|---|---|
+| **Assessment Agent** | `src/lib/ai/evaluator.server.ts` | Evaluates student explanations semantically against topic rubrics; assigns criterion status (`demonstrated`, `partially_demonstrated`, `missing`, `incorrect`) and transparent scores. |
+| **Misconception Detector** | `src/lib/agents/pipeline.server.ts` | Analyzes assessment evidence; isolates factual errors from incomplete knowledge; checks for recurring misconception tags across attempts. |
+| **Learning Twin** | `src/lib/learning/twin.ts` | Updates Bayesian mastery estimates and confidence scores; categorizes nodes as `mastered`, `learning`, `weak`, `available`, or `locked`. |
+| **Adaptive Planner** | `src/lib/learning/twin.ts` | Examines the prerequisite DAG and recommends the next concept to study; prioritizes prerequisite remediation and weak concept revision. |
+| **Socratic AI Tutor** | `src/lib/agents/pipeline.server.ts` | Answers questions and explains tricky mechanisms; receives assessment evidence as context so explanations directly address demonstrated gaps. |
 
 ---
 
 ## System Architecture
 
-The following diagram represents the intended high-level application flow. Optional providers and fallback behavior depend on the environment configuration.
-
 ```mermaid
 flowchart TB
-    U["Student Interface"]
-    U --> A["TanStack Start Application"]
+    subgraph Client ["Client Interface (React 19)"]
+        UI["Dashboard · Workspace · Concept Graph · Learning Twin · Agent Panel"]
+        AuthUI["Auth Modal & Guest Session Bridge"]
+    end
 
-    A --> B["Assessment API"]
-    B --> C["AI Gateway"]
+    subgraph Server ["Server Pipeline (TanStack Start / SSR)"]
+        API["Assessment API Route (/api/assessment)"]
+        TutorAPI["Tutor API Route (/api/tutor)"]
+        Pipeline["Five-Agent Pipeline (pipeline.server.ts)"]
+        AIGW["Pluggable AI Gateway (gateway.server.ts)"]
+    end
 
-    C --> D["Google Gemini"]
-    C --> E["OpenAI (optional, if configured)"]
-    C --> F["Rubric Fallback"]
+    subgraph AI ["AI & Evaluation Layer"]
+        Gemini["Google Gemini 3.8 Flash (Primary)"]
+        OpenAI["OpenAI gpt-4o-mini (Secondary)"]
+        Rubric["Heuristic Rubric Evaluator (Offline Fallback)"]
+    end
 
-    B --> G["Agent Pipeline"]
-    G --> H["Assessment"]
-    H --> I["Misconception Detection"]
-    I --> J["Learning Twin"]
-    J --> K["Adaptive Planner"]
-    K --> L["Learning Feedback"]
+    subgraph Storage ["Persistence"]
+        Supabase["Supabase (PostgreSQL, Auth, RLS)"]
+        Local["Browser Storage (Guest Mode)"]
+    end
 
-    A --> M["Supabase"]
-    A --> N["Browser Local Storage"]
-    L --> U
+    UI --> API
+    UI --> TutorAPI
+    API --> Pipeline
+    Pipeline --> AIGW
+    AIGW --> Gemini
+    AIGW --> OpenAI
+    AIGW --> Rubric
+    Pipeline --> Supabase
+    UI --> Local
 ```
 
-The application connects its user interface to server-side assessment and learning workflows. Supabase and browser storage are used according to the configured account and guest experiences.
-
 ---
 
-## The Five Agents
+## Learning Twin & Mastery Model
 
-| Agent | Responsibility |
-|---|---|
-| Assessment Agent | Evaluates explanations against assessment criteria. |
-| Misconception Detector | Identifies potential errors and conceptual gaps. |
-| Learning Twin | Maintains mastery estimates and learning evidence. |
-| Adaptive Planner | Recommends learning progression based on prerequisites and progress. |
-| Socratic AI Tutor | Provides contextual assistance on demand. |
+The Learning Twin models the student's cognitive grasp of each topic node over time.
 
-The workflow is designed to reuse structured assessment evidence between stages rather than treating every agent as an unrelated assessment.
+### Exponential Moving Average (EMA)
 
----
+Mastery updates use an exponential moving average over scored attempts, weighting recent performance:
 
-## Learning Twin and Mastery Model
+$$EMA_n = EMA_{n-1} \times (1 - \alpha) + Score_n \times \alpha$$
 
-The Learning Twin represents the learner's evolving understanding across curriculum concepts.
+$$\alpha = 0.55$$
 
-The interface presents information such as:
-- Concept mastery state.
-- Assessment and submission counts.
-- Concepts that are mastered, developing, or need attention.
-- Identified misconceptions, when available.
-- Learning progress across the selected path.
+Mastery only updates when an assessment yields a valid score (support sessions for uncertain students record an attempt without penalizing mastery).
 
-### Exponential Moving Average
+### Confidence Calculation
 
-The project documentation describes an Exponential Moving Average (EMA) update for mastery estimates:
+Confidence increases with sample size ($n$) and decreases when score variance is high:
 
-\[
-EMA_n = EMA_{n-1}(1-\alpha) + Score_n\alpha
-\]
+$$\text{evidence} = 1 - \frac{1}{1 + 0.75n}$$
 
-The documented learning-rate value is:
+$$\text{confidence} = \max\left(0.10, \min\left(0.95, \text{evidence} - \frac{\sigma}{250}\right)\right)$$
 
-\[
-\alpha = 0.55
-\]
+### Mastery Thresholds
 
-This gives more weight to recent assessment evidence. The actual displayed mastery state depends on the assessment data available to the application.
-
-### Documented mastery thresholds
-
-| State | Threshold |
-|---|---:|
-| Mastered | 75% and above |
-| Developing | 40%–74% |
-| Needs attention | Below 40% |
-| Prerequisite unlock threshold | 60% |
+| State | Threshold | Meaning |
+|---|---:|---|
+| **Mastered** | $\ge 75\%$ | High conceptual competence demonstrated |
+| **Learning** | $40\% - 74\%$ | Actively developing understanding |
+| **Weak / Needs Attention** | $< 40\%$ | Targeted practice and review recommended |
+| **Prerequisite Unlock Threshold** | $\ge 60\%$ | Minimum score required on prerequisites to unlock dependent nodes |
 
 ---
 
 ## Technology Stack
 
-The original project documentation identifies the following technologies. Confirm the current `package.json` and server configuration before changing versions or removing dependencies.
-
 | Layer | Technology |
 |---|---|
-| Application framework | TanStack Start |
-| Frontend | React, TypeScript |
-| Routing | TanStack Router |
-| Styling | Tailwind CSS |
-| UI primitives | Radix UI |
-| AI integration | Google Gemini; optional OpenAI integration if configured |
-| AI gateway | Lovable AI Gateway integration, where used |
-| Validation | Zod |
-| Database and authentication | Supabase |
-| Build tooling | Vite |
-| Vite configuration | `@lovable.dev/vite-tanstack-config`, if still present |
-| Testing | Vitest, Testing Library |
-| Charts | Recharts |
+| **Application Framework** | [TanStack Start](https://tanstack.com/start) (Full-stack React 19, SSR) |
+| **Client Routing** | [TanStack Router](https://tanstack.com/router) (Type-safe file-based routing) |
+| **UI Library** | React 19, Radix UI Primitives, Lucide Icons |
+| **Styling & Design System** | Tailwind CSS v4, JetBrains Mono, Space Grotesk, Plus Jakarta Sans |
+| **Primary AI Provider** | Google Gemini 3.8 Flash (Direct REST API integration) |
+| **Secondary AI Provider** | OpenAI gpt-4o-mini (Fallback support) |
+| **Offline Evaluation** | Topic-specific phrase-matching rubric evaluator |
+| **Schema Validation** | Zod v3 (Structured AI JSON schema enforcement) |
+| **Database & Auth** | Supabase (PostgreSQL, Row Level Security, Supabase Auth) |
+| **Data Visualization** | Recharts (Mastery progress curves, longitudinal timeline) |
+| **Build & Tooling** | Vite 8, Nitro, TypeScript 5.8 |
+| **Testing** | Vitest, Testing Library |
 
 ---
 
 ## Screenshots
 
 ### Onboarding
-
-The onboarding flow introduces Cognify and guides the learner through subject, topic, and difficulty selection.
+The onboarding experience introduces Cognify and guides the learner through subject, topic, and difficulty selection.
 
 ![Cognify onboarding](screenshots/01-onboarding.png)
 
 ### Dashboard
-
-The dashboard summarizes the selected learning path, recommended next activity, and current cognitive-model status.
+The central dashboard summarizes the active curriculum track, Bayesian mastery, recent submissions, and agent status.
 
 ![Cognify dashboard](screenshots/02-dashboard.png)
 
 ### Concept Graph
-
-The concept graph visualizes the curriculum's prerequisite relationships and indicates which concepts are available or locked.
+Interactive topological knowledge graph illustrating prerequisite dependencies, node states, and mastery badges.
 
 ![Cognify concept graph](screenshots/03-concept-graph.png)
 
 ### Learning Workspace
-
-The workspace is where students explain concepts in their own words and access assessment and tutoring features.
+Interactive study studio featuring challenge prompts, code insertion tools, live evaluation modal, and the Socratic AI Tutor.
 
 ![Cognify learning workspace](screenshots/04-learning-workspace.png)
 
 ### Learning Twin
-
-The Learning Twin presents the learner's current cognitive state, competency breakdown, and available assessment evidence.
+Visual model of cognitive competence, confidence levels, learning trends, and the misconception registry.
 
 ![Cognify Learning Twin](screenshots/05-learning-twin.png)
 
-### Progress and History
-
-The progress page displays saved evaluations and learning-history information.
+### Progress & History
+Comprehensive assessment ledger tracking scores, criteria breakdown, evaluator feedback, and longitudinal mastery over time.
 
 ![Cognify progress and history](screenshots/06-progress-history.png)
 
@@ -254,32 +242,61 @@ The progress page displays saved evaluations and learning-history information.
 
 ## Project Structure
 
-The following is a guide to the main areas described in the project documentation. Keep it synchronized with the actual repository as files change.
-
 ```text
 Cognify-adaptive-learning/
 ├── public/
+│   ├── favicon.svg          # Cognify SVG favicon (navy circle, teal ring & C glyph)
+│   ├── favicon.ico          # Multi-resolution Windows DIB ICO (16x16, 32x32, 48x48)
+│   ├── favicon.png          # Standard 32x32 PNG favicon
+│   ├── apple-touch-icon.png # 180x180 Apple touch icon
+│   └── robots.txt
+├── screenshots/             # Interface screenshots
+│   ├── 01-onboarding.png
+│   ├── 02-dashboard.png
+│   ├── 03-concept-graph.png
+│   ├── 04-learning-workspace.png
+│   ├── 05-learning-twin.png
+│   └── 06-progress-history.png
 ├── src/
 │   ├── components/
 │   │   └── cognify/
-│   │       ├── App.tsx
-│   │       ├── Dashboard.tsx
-│   │       ├── Workspace.tsx
-│   │       ├── ConceptGraph.tsx
-│   │       ├── LearningTwin.tsx
-│   │       ├── AgentPanel.tsx
-│   │       ├── AuthModal.tsx
-│   │       └── Onboarding.tsx
+│   │       ├── App.tsx              # Root application bootstrap & auth bridge
+│   │       ├── Dashboard.tsx        # Command center, curriculum cards, header
+│   │       ├── Workspace.tsx        # Assessment editor, submission dialog, tutor
+│   │       ├── ConceptGraph.tsx     # SVG topological prerequisite dependency graph
+│   │       ├── LearningTwin.tsx     # Cognitive model, mastery stats, misconceptions
+│   │       ├── AgentPanel.tsx       # Live five-agent telemetry & execution traces
+│   │       ├── AuthModal.tsx        # Supabase authentication modal
+│   │       ├── Onboarding.tsx       # Subject & topic track configuration
+│   │       └── Walkthrough.tsx      # Interactive guided walkthrough
+│   ├── data/
+│   │   └── sampleData.ts            # Foundational curriculum rubrics (C++ Pointers)
 │   ├── lib/
 │   │   ├── ai/
+│   │   │   ├── gateway.server.ts         # Pluggable AI gateway (Gemini, OpenAI, Fallback)
+│   │   │   ├── evaluator.server.ts       # Assessment Agent: semantic rubric evaluation
+│   │   │   ├── assessmentRubrics.server.ts # Topic-specific assessment criteria
+│   │   │   ├── assessmentPrompt.server.ts  # Rubric-aligned system prompts
+│   │   │   └── responseSchema.ts         # Zod schemas for AI JSON responses
 │   │   ├── agents/
+│   │   │   ├── pipeline.server.ts        # Five-agent cooperative execution pipeline
+│   │   │   └── agents.functions.ts       # TanStack Start server functions
 │   │   ├── learning/
-│   │   └── auth/
+│   │   │   ├── twin.ts                   # Pure Bayesian twin & planner algorithms
+│   │   │   ├── curriculumService.ts      # AI & heuristic curriculum generation
+│   │   │   └── useLearningData.ts        # Data hook: assessments, storage sync, twin
+│   │   ├── auth/
+│   │   │   └── AuthContext.tsx           # Supabase authentication context
+│   │   └── error-reporting.ts            # Client error boundary logger
 │   ├── routes/
-│   └── styles.css
+│   │   ├── __root.tsx       # Root document shell, favicon links, dark theme init
+│   │   └── index.tsx        # Main application route
+│   └── styles.css           # Global Tailwind CSS styles & typography variables
+├── drizzle/                 # Database schema migrations
 ├── supabase/
+│   └── config.toml          # Supabase project configuration
 ├── package.json
-├── vite.config.ts
+├── vite.config.ts           # Vite + TanStack Start configuration
 └── tsconfig.json
 ```
 
@@ -289,102 +306,101 @@ Cognify-adaptive-learning/
 
 ### Prerequisites
 
-- Node.js version supported by the project's `package.json`.
-- npm.
-- A configured Supabase project and/or AI provider for features that depend on those services.
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- npm or bun
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Thishanth-T/Cognify-adaptive-learning.git
-```
-
-### 2. Enter the project directory
-
-```bash
 cd Cognify-adaptive-learning
 ```
 
-### 3. Install dependencies
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Configure environment variables
+### 3. Configure environment variables
 
-Create a `.env` file in the project root. Use the variable names required by the current server and Supabase configuration.
+Create a `.env` file in the project root:
 
-### 5. Start the development server
+```env
+# Google Gemini API Key (Required for live AI assessment)
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.8-flash
+
+# Supabase (Optional: required for cloud authentication & persistence)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+
+# OpenAI API Key (Optional: secondary fallback provider)
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+> **Note:** If `GEMINI_API_KEY` is not provided, Cognify operates in **deterministic rubric fallback mode**, evaluating answers against topic-specific rubrics. Without Supabase keys, Cognify runs in **guest mode** with full offline localStorage persistence.
+
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open the local URL printed in the terminal.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Production build
+### 5. Build for production
 
 ```bash
 npm run build
 ```
 
-Run tests using the test script defined in `package.json` (for example, `npm test` if that script exists).
+### 6. Run test suites
+
+```bash
+npm run test
+```
 
 ---
 
-## Environment Variables
+## Environment Variables Reference
 
-The exact variable names must match the implementation in the repository. The following are examples of common configuration entries; do not add variables that the code does not read.
-
-```env
-# Supabase — use the exact names expected by your application
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Gemini — use the exact server-side variable name expected by the AI gateway
-GEMINI_API_KEY=your_gemini_api_key
-
-# Optional OpenAI integration, only if implemented and enabled
-OPENAI_API_KEY=your_openai_api_key
-```
-
-**Security**
-- Never commit the real `.env` file or API keys.
-- Keep private AI provider keys on the server.
-- Do not expose secret keys in browser-side code.
-- Provide an `.env.example` containing placeholders if the project uses one.
-
-If no AI provider is configured, the application may use its rubric fallback if that fallback is enabled. Cloud authentication and persistence require the corresponding Supabase configuration.
+| Variable | Required | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | Recommended | Google Gemini API key used by the Assessment and Tutor agents. |
+| `GEMINI_MODEL` | Optional | Gemini model name (defaults to `gemini-3.8-flash`). |
+| `VITE_SUPABASE_URL` | Optional | Supabase project URL for cloud authentication and record persistence. |
+| `VITE_SUPABASE_ANON_KEY` | Optional | Supabase anonymous public key. |
+| `OPENAI_API_KEY` | Optional | Secondary AI provider key if Gemini is unavailable. |
+| `DATABASE_URL` | Optional | PostgreSQL connection string for Drizzle database migrations. |
 
 ---
 
 ## Roadmap
 
-Potential future improvements include:
-
-- Spaced-repetition scheduling.
-- Expanded multilingual learning support.
-- Instructor dashboards and class-level analytics.
-- Additional adaptive practice activities.
-- Collaborative learning features.
-- Offline learning support.
+- [ ] **Spaced-Repetition Scheduling** — Resurface weak or decaying concepts using the SM-2 algorithm.
+- [ ] **Multi-Subject Expansion** — Specialized rubric templates for Python, Rust, algorithms, and system design.
+- [ ] **Classroom Analytics Dashboard** — Aggregated cohort analytics for instructors.
+- [ ] **Dynamic Coding Sandboxes** — In-browser execution environments alongside conceptual explanations.
+- [ ] **Peer Explanation Review** — Collaborative review sessions with AI-guided moderation.
 
 ---
 
 ## Acknowledgements
 
-Cognify uses open-source technologies and external services, including React, TanStack, Supabase, Tailwind CSS, Radix UI, Zod, and Recharts.
-
-### Development tools
-
-The project was developed with assistance from **Lovable** and **Google Antigravity**. Lovable-related gateway or build-configuration packages are retained in the technology description where they remain part of the codebase.
-
-Cognify is an independent project and is not affiliated with or endorsed by the third-party services it integrates with.
+Cognify is built with open-source software and tools:
+- [TanStack Start](https://tanstack.com/start) & [TanStack Router](https://tanstack.com/router)
+- [React 19](https://react.dev/)
+- [Google Gemini API](https://ai.google.dev/)
+- [Supabase](https://supabase.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Radix UI](https://www.radix-ui.com/)
+- [Zod](https://zod.dev/)
+- [Recharts](https://recharts.org/)
 
 ---
 
 <p align="center">
-  <strong>Cognify — Your Adaptive Learning Platform</strong><br>
-  <em>Understand more. Learn better. Progress smarter.</em>
+  <strong>Cognify — Adaptive AI Learning Platform</strong><br>
+  <em>Understand conceptually. Master systematically. Progress adaptively.</em>
 </p>

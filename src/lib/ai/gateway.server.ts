@@ -1,4 +1,4 @@
-// Pluggable AI Gateway with multi-provider fallback (Lovable Gateway, OpenAI, Gemini)
+// Independent AI Gateway with direct provider support (Google Gemini & OpenAI)
 import dns from "node:dns";
 try {
   dns.setDefaultResultOrder?.("ipv4first");
@@ -26,7 +26,7 @@ function getEnv(name: string): string | undefined {
       const candidates = [
         path.resolve(process.cwd(), ".env"),
         typeof __dirname !== "undefined" ? path.resolve(__dirname, "../../..", ".env") : null,
-        "T:\\Cognify\\project-migration-studio\\.env",
+        "T:\\Cognify\\Cognify-adaptive-learning\\.env",
       ].filter(Boolean);
 
       for (const envPath of candidates) {
@@ -44,17 +44,6 @@ function getEnv(name: string): string | undefined {
     /* ignore */
   }
   return undefined;
-}
-
-let aiGatewayModule: any = null;
-async function getAiGateway() {
-  if (aiGatewayModule) return aiGatewayModule;
-  try {
-    aiGatewayModule = await import("@lovable.dev/ai-gateway");
-    return aiGatewayModule;
-  } catch {
-    return null;
-  }
 }
 
 async function callOpenAI(opts: {
@@ -145,30 +134,21 @@ async function callGemini(opts: {
   return JSON.parse(cleanText.trim());
 }
 
-/** Calls the configured model with strict JSON output and returns the parsed JSON (unvalidated). */
+/** Calls the configured provider with strict JSON output and returns the parsed JSON (unvalidated). */
 export async function generateJson(opts: {
   system: string;
   user: string;
   schemaName: string;
   schema: Record<string, unknown>;
 }): Promise<unknown> {
-  // 1. Try Lovable Cloud AI Gateway if configured
-  if (getEnv("LOVABLE_API_KEY")) {
+  // 1. Try Google Gemini API if configured
+  if (getEnv("GEMINI_API_KEY")) {
     try {
-      const gateway = await getAiGateway();
-      if (gateway) {
-        const res = await gateway.generateResponse({
-          model: TEXT_MODEL,
-          instructions: opts.system,
-          input: [{ role: "user", content: opts.user }],
-          reasoning: { effort: "low" },
-          text: { format: { type: "json_schema", name: opts.schemaName, schema: opts.schema, strict: true } },
-        });
-        const text = extractText(res);
-        if (text) return JSON.parse(text);
-      }
-    } catch (gwErr) {
-      console.warn("Lovable AI Gateway unavailable, checking alternate providers:", gwErr instanceof Error ? gwErr.message : gwErr);
+      const geminiResult = await callGemini(opts);
+      if (geminiResult) return geminiResult;
+    } catch (geminiErr) {
+      if (geminiErr instanceof AIUnavailableError) throw geminiErr;
+      console.warn("Gemini evaluation error:", geminiErr);
     }
   }
 
@@ -183,30 +163,8 @@ export async function generateJson(opts: {
     }
   }
 
-  // 3. Try direct Gemini API if configured
-  if (getEnv("GEMINI_API_KEY")) {
-    try {
-      const geminiResult = await callGemini(opts);
-      if (geminiResult) return geminiResult;
-    } catch (geminiErr) {
-      if (geminiErr instanceof AIUnavailableError) throw geminiErr;
-      console.warn("Gemini fallback failed:", geminiErr);
-    }
-  }
-
   throw new AIUnavailableError(
-    "The AI gateway is not configured for this deployment environment.",
+    "AI provider is not configured. Please ensure GEMINI_API_KEY is defined in your environment.",
     "config"
   );
-}
-
-function extractText(res: unknown): string {
-  const r = res as { output_text?: string; output?: { type: string; content?: { type: string; text?: string }[] }[] };
-  if (typeof r.output_text === "string" && r.output_text) return r.output_text;
-  return (r.output ?? [])
-    .filter((o) => o.type === "message")
-    .flatMap((o) => o.content ?? [])
-    .filter((c) => c.type === "output_text" && c.text)
-    .map((c) => c.text)
-    .join("");
 }
