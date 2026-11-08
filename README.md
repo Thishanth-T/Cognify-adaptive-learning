@@ -1,10 +1,12 @@
-# Cognify — Your Adaptive Learning Platform
+<h1 align="center">Cognify — Your Adaptive Learning Platform</h1>
 
 <p align="center">
   <strong>An AI-powered adaptive learning platform that focuses on how students understand concepts.</strong>
 </p>
 
-Cognify turns explanation-based assessments into a personalized learning experience. Students explain concepts in their own words, receive structured feedback, identify knowledge gaps, and follow a learning path shaped by concept prerequisites and assessment evidence.
+<p align="center">
+  Cognify turns explanation-based assessments into a personalized learning experience. Students explain concepts in their own words, receive structured feedback, identify knowledge gaps, and follow a learning path shaped by concept prerequisites and assessment evidence.
+</p>
 
 ---
 
