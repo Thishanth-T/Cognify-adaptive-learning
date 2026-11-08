@@ -58,25 +58,38 @@ export const assessSignedIn = createServerFn({ method: "POST" })
     }));
     const result = await runPipeline({ ...data, history });
     const a = result.assessment;
-    const { error: insertError } = await context.supabase.from("assessments").insert({
-      user_id: context.userId,
-      subject: data.subject,
-      topic: data.topic,
-      concept: result.entry.concept,
-      question: data.question,
-      answer: data.answer,
-      score: a.score,
-      status: a.status,
-      correct: a.correct,
-      feedback: a.feedback,
-      strengths: a.strengths,
-      missing_points: a.missingPoints,
-      misconceptions: result.misconceptionReport.detected,
-      recommended_next_step: a.recommendedNextStep,
-      evaluation_method: a.evaluationMethod,
-    });
-    if (insertError) throw new Error("Your answer was assessed but could not be saved. Please try again.");
-    return result;
+    const { data: insertedRow, error: insertError } = await context.supabase
+      .from("assessments")
+      .insert({
+        user_id: context.userId,
+        subject: data.subject,
+        topic: data.topic,
+        concept: result.entry.concept,
+        question: data.question,
+        answer: data.answer,
+        score: a.score,
+        status: a.status,
+        correct: a.correct,
+        feedback: a.feedback,
+        strengths: a.strengths,
+        missing_points: a.missingPoints,
+        misconceptions: result.misconceptionReport.detected,
+        recommended_next_step: a.recommendedNextStep,
+        evaluation_method: a.evaluationMethod,
+      })
+      .select("id")
+      .maybeSingle();
+
+      if (insertError || !insertedRow?.id) {
+        throw new Error(
+          "Your answer was assessed but could not be saved. Please try again."
+        );
+      }
+      return {
+        ...result,
+        dbId: insertedRow.id,
+        savedToDatabase: true,
+      };
   });
 
 export const getLesson = createServerFn({ method: "POST" })

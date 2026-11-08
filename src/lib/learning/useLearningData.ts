@@ -318,6 +318,7 @@ export function useLearningData(
     // 2. Normal answer: evaluate with multi-agent pipeline
     let resultAssessment: FullAssessment | null = null
     let resultTraces: Array<Omit<AgentTraceLog, 'id' | 'timestamp'>> = []
+    let savedByServer = false
 
     const startTimer = Date.now()
 
@@ -334,9 +335,10 @@ export function useLearningData(
             answer: cleanAnswer,
           },
         })
+        savedByServer = (res as any)?.savedToDatabase === true
         const a = res.assessment
         resultAssessment = {
-          id: `assessment-${now}`,
+          id: (res as any)?.dbId || `assessment-${now}`,
           concept: conceptLabel,
           question: questionText,
           answer: cleanAnswer,
@@ -540,8 +542,8 @@ export function useLearningData(
       }
     }
 
-    // 3. Save to database if user is authenticated
-    if (userId && resultAssessment) {
+    // 3. Save to database if user is authenticated AND the server has not already saved it
+    if (userId && resultAssessment && !savedByServer) {
       try {
         await supabase.from('assessments').insert({
           user_id: userId,
